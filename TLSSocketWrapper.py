@@ -15,10 +15,10 @@ class TLSSocketWrapper:
         ssl_context.set_max_proto_version(SSL.TLS1_3_VERSION)
         # As of pyopenssl 25.1.0, no way to select the ciphersuites, only in 25.2.0
         # https://github.com/pyca/pyopenssl/pull/1432
-        # try:
-        #     ssl_context.set_tls13_ciphersuites(b"TLS_AES_128_CCM_SHA256")
-        # except Exception as e:
-        #     print(f"Error: Could not set specific cipher suites: {e}")
+        try:
+            ssl_context.set_tls13_ciphersuites(b"TLS_AES_128_CCM_SHA256")
+        except Exception as e:
+            print(f"Error: Could not set specific cipher suites: {e}")
 
         #-no_ticket
         ssl_context.set_session_cache_mode(SSL.SESS_CACHE_OFF)
@@ -44,6 +44,7 @@ class TLSSocketWrapper:
             raise Exception("Hostname or port not set")
         if self.__connection.connect_ex((hostname,port)) != 0:
             raise Exception("Error when connecting")
+        self.__connection.do_handshake()
 
 
     def receive(self):
