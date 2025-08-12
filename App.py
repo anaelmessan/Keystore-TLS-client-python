@@ -1,5 +1,6 @@
 import TLSSocketWrapper
+import sys
 
 if __name__ == "__main__":
-    test = TLSSocketWrapper.TLSSocketWrapper("key17.com", hostname="185.216.10.85",port=8888)
+    test = TLSSocketWrapper.TLSSocketWrapper(sys.argv[1], hostname=sys.argv[2],port=int(sys.argv[3]))
     test.connect()
