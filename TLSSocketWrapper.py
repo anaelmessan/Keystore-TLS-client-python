@@ -3,7 +3,8 @@ import socket
 
 class TLSSocketWrapper:
     def __init__(self):
-        self.__create_ssl_context()
+        self.__context = self.__create_ssl_context()
+        self.__connection = self.__create_connection(self.__context)
 
     @staticmethod
     def __create_ssl_context():
@@ -20,6 +21,11 @@ class TLSSocketWrapper:
 
         return ssl_context
 
+    @staticmethod
+    def __create_connection(context):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.settimeout(10)
+        return SSL.Connection(context, sock)
 
     def connect(self):
         pass
@@ -29,3 +35,5 @@ class TLSSocketWrapper:
 
     def send(self,data):
         pass
+    def __str__(self):
+        return ""
