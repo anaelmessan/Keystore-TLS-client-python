@@ -15,3 +15,7 @@ if __name__ == "__main__":
     test = TLSSocketWrapper.TLSSocketWrapper(sys.argv[1], hostname=sys.argv[2],port=int(sys.argv[3]))
     test.set_psk(read_psk("./psk"))
     test.connect()
+    test.send("Z00010203040506070809101112131415161718182021223242526272829303132\n")
+    print(test.receive().decode())
+    test.send("I00\n")
+    print(test.receive().decode())

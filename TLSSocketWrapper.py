@@ -49,9 +49,10 @@ class TLSSocketWrapper:
 
 
     def receive(self):
-        pass
+        #TODO: Exception handling
+        return self.__ssock.recv()
 
     def send(self,data):
-        pass
+        self.__ssock.send(data.encode('utf-8'))
     def __str__(self):
         return ""
