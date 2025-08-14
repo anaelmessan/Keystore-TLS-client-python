@@ -3,8 +3,10 @@ import socket
 
 class TLSSocketWrapper:
     def __init__(self, servername, hostname=None, port=None):
+        print("Using OpenSSL ", ssl.OPENSSL_VERSION_INFO)
         self.__hostname = hostname
         self.__port = port
+        self.__servername = servername
         self.__context = self.__create_ssl_context()
         self.__ssock = None
         self.__psk = None
@@ -18,7 +20,7 @@ class TLSSocketWrapper:
         ssl_context.minimum_version = ssl.TLSVersion.TLSv1_3
         ssl_context.maximum_version = ssl.TLSVersion.TLSv1_3
         ssl_context.set_ecdh_curve("prime256v1")
-        ssl_context.session_tickets = False
+        ssl_context.options &= ssl.OP_NO_TICKET
         return ssl_context
 
     def set_psk(self,psk):
@@ -36,7 +38,8 @@ class TLSSocketWrapper:
         sock = socket.create_connection((hostname, port), timeout=10)
 
         try:
-            self.__ssock = self.__context.wrap_socket(sock, server_hostname=hostname)
+            print(self.__hostname)
+            self.__ssock = self.__context.wrap_socket(sock, server_hostname=self.__servername)
             print(f"✅ Connected using {self.__ssock.version()}")
         except Exception as e:
             sock.close()
