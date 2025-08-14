@@ -1,4 +1,4 @@
-from OpenSSL import SSL, crypto
+import ssl
 import socket
 
 class TLSSocketWrapper:
@@ -6,45 +6,43 @@ class TLSSocketWrapper:
         self.__hostname = hostname
         self.__port = port
         self.__context = self.__create_ssl_context()
-        self.__connection = self.__create_connection(self.__context, servername)
+        self.__ssock = None
+        self.__psk = None
 
     @staticmethod
     def __create_ssl_context():
-        ssl_context = SSL.Context(SSL.TLS_METHOD)
-        ssl_context.set_min_proto_version(SSL.TLS1_3_VERSION)
-        ssl_context.set_max_proto_version(SSL.TLS1_3_VERSION)
-        # As of pyopenssl 25.1.0, no way to select the ciphersuites, only in 25.2.0
-        # https://github.com/pyca/pyopenssl/pull/1432
-        try:
-            ssl_context.set_tls13_ciphersuites(b"TLS_AES_128_CCM_SHA256")
-        except Exception as e:
-            print(f"Error: Could not set specific cipher suites: {e}")
-
-        #-no_ticket
-        ssl_context.set_session_cache_mode(SSL.SESS_CACHE_OFF)
-        #context.set_psk_client_callback(psk_client_callback)
-
+        #Cipher cannot be set
+        ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        ssl_context.minimum_version = ssl.TLSVersion.TLSv1_3
+        ssl_context.maximum_version = ssl.TLSVersion.TLSv1_3
+        ssl_context.set_ecdh_curve("prime256v1")
+        ssl_context.session_tickets = False
         return ssl_context
 
-    @staticmethod
-    def __create_connection(context, servername):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(10)
-        connection = SSL.Connection(context, sock)
-        #-servername
-        connection.set_tlsext_host_name(servername.encode())
-        return connection
+    def set_psk(self,psk):
+        self.__psk = psk
+        self.__context.set_psk_client_callback(lambda hint: ("Client_identity", self.__psk))
 
     def connect(self, hostname=None, port=None):
         if hostname is None:
             hostname = self.__hostname
         if port is None:
             port = self.__port
-        if (hostname is None) or (port is None):
+        if not hostname or not port:
             raise Exception("Hostname or port not set")
-        if self.__connection.connect_ex((hostname,port)) != 0:
-            raise Exception("Error when connecting")
-        self.__connection.do_handshake()
+
+        sock = socket.create_connection((hostname, port), timeout=10)
+
+        try:
+            self.__ssock = self.__context.wrap_socket(sock, server_hostname=hostname)
+            print(f"✅ Connected using {self.__ssock.version()}")
+        except Exception as e:
+            sock.close()
+            raise Exception(f"TLS handshake failed: {e}")
+
+
 
 
     def receive(self):
