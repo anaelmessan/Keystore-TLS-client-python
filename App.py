@@ -1,13 +1,14 @@
 import CLI_Interface
 import TLSSocketWrapper
 import config
+import sys
 
 def read_psk(path):
-    with open(path, 'r') as file:
-        hex_str = file.read().strip()
+    #with open(path, 'r') as file:
+    #    hex_str = file.read().strip()
 
     try:
-        byte_data = bytes.fromhex(hex_str)
+        byte_data = bytes.fromhex(path)
     except ValueError as e:
         print("Invalid hex string:", e)
     return byte_data
@@ -37,3 +38,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    #test.write(00, "0102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F20")
+

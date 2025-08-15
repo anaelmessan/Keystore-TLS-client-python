@@ -45,9 +45,9 @@ class CLIInterface:
             record_number (int): The record number to write to.
             bytes_data (str): The bit string to write.
         """
-        print(f"[+] Writing to record {record_number}: {bytes_data}")
+        print(f"[*] Writing...")
         self.server_socket.write(record_number, bytes_data)
-        print(self.server_socket.receive())
+        print(f'[*] {self.server_socket.receive().decode().strip()}')
 
     def read(self, record_number):
         """
@@ -56,9 +56,9 @@ class CLIInterface:
         Args:
             record_number (int): The record number to read from.
         """
-        print(f"[+] Reading from record {record_number}")
+        print(f"[*] Reading...")
         self.server_socket.read(record_number)
-        print(self.server_socket.receive())
+        print(f'[*] {self.server_socket.receive().decode().strip()}')
 
     def exit(self):
         self.server_socket.close()

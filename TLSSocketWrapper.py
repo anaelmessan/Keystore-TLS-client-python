@@ -34,9 +34,8 @@ class TLSSocketWrapper:
             port = self.__port
         if not hostname or not port:
             raise Exception("Hostname or port not set")
-
         sock = socket.create_connection((hostname, port), timeout=10)
-
+        
         try:
             print(self.__hostname)
             self.__ssock = self.__context.wrap_socket(sock, server_hostname=self.__servername)
@@ -57,9 +56,8 @@ class TLSSocketWrapper:
         Args:
             record_number (int): The record number to read from.
         """
-        self.connect()
-        data = f'I{record_number}\n'.encode('utf-8')
-        self.__ssock.send(data.encode('utf-8'))
+        data = f'I{record_number:02x}\n'.encode('utf-8')
+        self.__ssock.send(data)
 
     def write(self, record_number, bytes_data):
         """
@@ -71,9 +69,8 @@ class TLSSocketWrapper:
             record_number (int): The record number to write to.
             bytes_data (str): The bit string to write.
         """
-        self.connect()
-        data = f'Z{record_number}{bytes_data}\n'.encode('utf-8')
-        self.__ssock.send(data.encode('utf-8'))
+        data = f'Z{record_number:02x}{bytes_data}\n'.encode('utf-8')
+        self.__ssock.send(data)
 
     def receive(self):
         #TODO: Exception handling
