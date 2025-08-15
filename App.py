@@ -20,7 +20,6 @@ def main():
     # Create server socket instance
     server = TLSSocketWrapper.TLSSocketWrapper(SERVERNAME, hostname=HOST, port=PORT)
     server.set_psk(read_psk(PSK_BYTES))
-    
     # Create CLI interface instance
     cli = CLI_Interface.CLIInterface(server)
 
