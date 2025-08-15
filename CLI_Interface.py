@@ -5,27 +5,27 @@ class CLIInterface:
     def __init__(self, server: TLSSocketWrapper.TLSSocketWrapper):
         self.server_socket = server
 
-    def start(self):
-        """
-        Initialize the CLI, connect to available servers, and prepare for user commands.
-        Tries to connect to each server in order until successful or all fail.
-        """
-        server_names = ["key17", "key20"]
-        server_value = 0
+    def start_attempt(self, server_name):
+        """Prints start and connection attempt messages."""
         print("[+] Starting CLI Interface...")
-        print(f"[+] Connecting to server {server_names[server_value]}...")
-        connexion = self.server_socket.connect()
-        while not connexion:
-            print(f"[-] Failed to connect to {server_names[server_value]}.")
-            if server_value + 1 >= len(server_names):
-                print("[-] No more servers to connect to.")
-                print("[-] Cannot connect to any server.")
-                print("[-] Exiting...")
-                exit()
-            server_value += 1
-            print(f"[+] Attempting to connect to {server_names[server_value]}...")
-            connexion = self.server_socket.connect()
-        print(f"[+] Connected to {server_names[server_value]}.")
+        print(f"[+] Connecting to server {server_name}...")
+
+    def attempt_failed(self, server_name):
+        """Prints a message when connection to server fails."""
+        print(f"[-] Failed to connect to server {server_name}.")
+
+    def attempt_reconnect(self, server_name):
+        """Prints a message when attempting to reconnect."""
+        print(f"[+] Attempting to reconnect to server {server_name}...")
+
+    def no_more_servers(self):
+        """Prints a message when no servers are available."""
+        print("[-] Cannot connect to any server.")
+        print("[-] Exiting...")
+
+    def success_connect(self, server_name):
+        """Prints a message when connection to server is successful."""
+        print(f"[+] Connected to {server_name}.")
         print("[+] Ready to send commands.")
         print("[+] For help, type 'help'.]")
 
@@ -37,17 +37,17 @@ class CLIInterface:
         print("  - read record#<number>: Read the bit string")
         print("  - exit: Exit the CLI")
 
-    def write(self, record_number, bytes_data):
+    def command_attempt(self):
         """
-        Write a bit string to the specified record number by sending a request to the server.
+        Prints a message indicating a command attempt.
+        """
+        print(f"[*] Executing command...")
 
-        Args:
-            record_number (int): The record number to write to.
-            bytes_data (str): The bit string to write.
+    def command_success(self, response):
         """
-        print(f"[*] Writing...")
-        self.server_socket.write(record_number, bytes_data)
-        print(f'[*] {self.server_socket.receive().decode().strip()}')
+        Prints a message indicating a successful command operation.
+        """
+        print(f'[*] {response}')
 
     def read(self, record_number):
         """
@@ -61,54 +61,25 @@ class CLIInterface:
         print(f'[*] {self.server_socket.receive().decode().strip()}')
 
     def exit(self):
-        self.server_socket.close()
+        """Prints exit messages for the CLI."""
         print("[+] Closing connection to server...")
-        print(self.server_socket.receive().decode().strip())
         print("[+] Exiting CLI...")
 
-    def run_command(self, command):
-        """
-        Parse and execute a CLI command by sending the appropriate request to the server.
+    def invalid_format(self):
+        """Prints a message for invalid command format."""
+        print("[-] Error: Invalid command format.")
+    
+    def invalid_write_args(self):
+        print("[-] Error: 'write' command requires record number and bytes data")
+        print("[*] Usage: write record#<number> <bytes>")
 
-        Args:
-            command (str): The command string entered by the user.
-        Returns:
-            bool or None: False if the command is 'exit', otherwise None.
-        """
-        parts = command.split()
-        cmd = parts[0]
-        if cmd == "help":
-            self.help()
-        elif cmd == "exit":
-            self.exit()
-            return False
-        elif "\r\n" in command or "`" in command:
-            print("[-] Error: Invalid command format.")
-            return False
-        elif cmd == "write":
-            if len(parts) != 3:
-                print("[-] Error: 'write' command requires record number and bytes data")
-                print("[*] Usage: write record#<number> <bytes>")
-                return
-            match = re.search(r"#(\d+)", parts[1])
-            if not match:
-                print("[-] Error: Invalid record number format.")
-                print("[*] Format: record#<number>")
-                return
-            record_number = int(match.group(1))
-            bytes_data = parts[2]
-            self.write(record_number, bytes_data)
-        elif cmd == "read":
-            if len(parts) != 2:
-                print("[-] Error: 'read' command requires record number")
-                print("[*] Usage: read record#<number>")
-                return
-            match = re.search(r"#(\d+)", parts[1])
-            if not match:
-                print("[-] Error: Invalid record number format.")
-                print("[*] Format: record#<number>")
-                return
-            record_number = int(match.group(1))
-            self.read(record_number)
-        else:
-            print("[-] Unknown command")
+    def invalid_read_args(self):
+        print("[-] Error: 'read' command requires record number")
+        print("[*] Usage: read record#<number>")
+    
+    def invalid_record(self):
+        print("[-] Error: Invalid record number format.")
+        print("[*] Format: record#<number>")
+
+    def invalid_command(self):
+        print("[-] Unknown command")
