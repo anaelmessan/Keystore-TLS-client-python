@@ -28,6 +28,7 @@ echo "Successfully updated $FILE"
 
 ./Configure
 make
+cd ..
 rm -r openssl-3.5.3/
 mv "openssl-3.5.2/" "openssl-3.5.3/"
 rm "$ARCHIVE"
