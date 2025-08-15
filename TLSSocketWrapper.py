@@ -34,25 +34,54 @@ class TLSSocketWrapper:
             port = self.__port
         if not hostname or not port:
             raise Exception("Hostname or port not set")
-
         sock = socket.create_connection((hostname, port), timeout=10)
-
+        
+        success = False
         try:
             print(self.__hostname)
             self.__ssock = self.__context.wrap_socket(sock, server_hostname=self.__servername)
             print(f"✅ Connected using {self.__ssock.version()}")
+            
         except Exception as e:
             sock.close()
             raise Exception(f"TLS handshake failed: {e}")
+        
+        
+        #TODO
+        return self
 
+    def read(self, record_number):
+        """
+        Reads the bit string stored at the specified record number (location 00 of key17).
+        This method reconnects to the server for each command due to server timeout constraints.
+        Sends a read command to the server for the given record number.
 
+        Args:
+            record_number (int): The record number to read from.
+        """
+        data = f'I{record_number:02x}\n'.encode('utf-8')
+        self.__ssock.send(data)
 
+    def write(self, record_number, bytes_data):
+        """
+        Writes a bit string to the specified record number (location 00 of key17).
+        This method reconnects to the server for each command due to server timeout constraints.
+        Sends a write command to the server with the given record number and bit string.
+
+        Args:
+            record_number (int): The record number to write to.
+            bytes_data (str): The bit string to write.
+        """
+        data = f'Z{record_number:02x}{bytes_data}\n'.encode('utf-8')
+        self.__ssock.send(data)
 
     def receive(self):
-        #TODO: Exception handling
         return self.__ssock.recv()
 
-    def send(self,data):
-        self.__ssock.send(data.encode('utf-8'))
+    def close(self):
+        data = f'?02\n'.encode('utf-8')
+        self.__ssock.send(data)
+        return False
+
     def __str__(self):
         return ""

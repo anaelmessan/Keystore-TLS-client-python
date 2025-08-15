@@ -1,21 +1,22 @@
-import TLSSocketWrapper
-import sys
+import Controller
 
-def read_psk(path):
-    with open(path, 'r') as file:
-        hex_str = file.read().strip()
 
+def read_psk(byte):
     try:
-        byte_data = bytes.fromhex(hex_str)
+        byte_data = bytes.fromhex(byte)
     except ValueError as e:
         print("Invalid hex string:", e)
     return byte_data
 
+
+def main():
+    controller = Controller.Controller()
+    while True:
+        command = input("Enter command: ")
+        status = controller.run_command(command)
+        if status is False:
+            break
+
+
 if __name__ == "__main__":
-    test = TLSSocketWrapper.TLSSocketWrapper(sys.argv[1], hostname=sys.argv[2],port=int(sys.argv[3]))
-    test.set_psk(read_psk(sys.argv[4]))
-    test.connect()
-    test.send("Z00010203040506070809101112131415161718182021223242526272829303132\n")
-    print(test.receive().decode())
-    test.send("I00\n")
-    print(test.receive().decode())
+    main()
