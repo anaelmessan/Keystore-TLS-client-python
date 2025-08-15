@@ -44,15 +44,44 @@ class TLSSocketWrapper:
         except Exception as e:
             sock.close()
             raise Exception(f"TLS handshake failed: {e}")
+        
+        #TODO
+        return True
 
+    def read(self, record_number):
+        """
+        Reads the bit string stored at the specified record number (location 00 of key17).
+        This method reconnects to the server for each command due to server timeout constraints.
+        Sends a read command to the server for the given record number.
 
+        Args:
+            record_number (int): The record number to read from.
+        """
+        self.connect()
+        data = f'I{record_number}\n'.encode('utf-8')
+        self.__ssock.send(data.encode('utf-8'))
 
+    def write(self, record_number, bytes_data):
+        """
+        Writes a bit string to the specified record number (location 00 of key17).
+        This method reconnects to the server for each command due to server timeout constraints.
+        Sends a write command to the server with the given record number and bit string.
+
+        Args:
+            record_number (int): The record number to write to.
+            bytes_data (str): The bit string to write.
+        """
+        self.connect()
+        data = f'Z{record_number}{bytes_data}\n'.encode('utf-8')
+        self.__ssock.send(data.encode('utf-8'))
 
     def receive(self):
         #TODO: Exception handling
         return self.__ssock.recv()
 
-    def send(self,data):
-        self.__ssock.send(data.encode('utf-8'))
+    def close(self):
+        #TODO
+        pass
+
     def __str__(self):
         return ""

@@ -1,5 +1,6 @@
+import CLI_Interface
 import TLSSocketWrapper
-import sys
+import config
 
 def read_psk(path):
     with open(path, 'r') as file:
@@ -11,11 +12,28 @@ def read_psk(path):
         print("Invalid hex string:", e)
     return byte_data
 
+def main():
+    #sera remplacé par un .dotenv
+    HOST = config.HOST
+    PORT = config.PORT
+    SERVERNAME = config.SERVERNAME
+    PSK_BYTES = config.PSK_BYTES
+
+    # Create server socket instance
+    server = TLSSocketWrapper.TLSSocketWrapper(SERVERNAME, hostname=HOST, port=PORT)
+    server.set_psk(read_psk(PSK_BYTES))
+    # Create CLI interface instance
+    cli = CLI_Interface.CLIInterface(server)
+
+    # Start the CLI interface
+    cli.start()
+
+    while True:
+        command = input("Enter command: ")
+        status = cli.run_command(command)
+        if status is False:
+            break
+
+
 if __name__ == "__main__":
-    test = TLSSocketWrapper.TLSSocketWrapper(sys.argv[1], hostname=sys.argv[2],port=int(sys.argv[3]))
-    test.set_psk(read_psk(sys.argv[4]))
-    test.connect()
-    test.send("Z00010203040506070809101112131415161718182021223242526272829303132\n")
-    print(test.receive().decode())
-    test.send("I00\n")
-    print(test.receive().decode())
+    main()

@@ -1,11 +1,15 @@
-import server_socket
+import TLSSocketWrapper
 import re
 
 class CLIInterface:
-    def __init__(self, server: server_socket.server_socket):
+    def __init__(self, server: TLSSocketWrapper.TLSSocketWrapper):
         self.server_socket = server
 
     def start(self):
+        """
+        Initialize the CLI, connect to available servers, and prepare for user commands.
+        Tries to connect to each server in order until successful or all fail.
+        """
         server_names = ["key17", "key20"]
         server_value = 0
         print("[+] Starting CLI Interface...")
@@ -22,11 +26,11 @@ class CLIInterface:
             print(f"[+] Attempting to connect to {server_names[server_value]}...")
             connexion = self.server_socket.connect()
         print(f"[+] Connected to {server_names[server_value]}.")
-        print(connexion)
         print("[+] Ready to send commands.")
         print("[+] For help, type 'help'.]")
 
     def help(self):
+        """Display available CLI commands."""
         print("[+] Available commands:")
         print("  - help: Show this help message")
         print("  - write record#<number> <bytes>: Write a <bytes> to location 00 of key17")
@@ -34,19 +38,40 @@ class CLIInterface:
         print("  - exit: Exit the CLI")
 
     def write(self, record_number, bytes_data):
+        """
+        Write a bit string to the specified record number by sending a request to the server.
+
+        Args:
+            record_number (int): The record number to write to.
+            bytes_data (str): The bit string to write.
+        """
         print(f"[+] Writing to record {record_number}: {bytes_data}")
         self.server_socket.write(record_number, bytes_data)
-        print(self.server_socket.recv())
+        print(self.server_socket.receive())
 
     def read(self, record_number):
+        """
+        Read a bit string from the specified record number by sending a request to the server.
+
+        Args:
+            record_number (int): The record number to read from.
+        """
         print(f"[+] Reading from record {record_number}")
         self.server_socket.read(record_number)
-        print(self.server_socket.recv())
+        print(self.server_socket.receive())
 
     def exit(self):
         self.server_socket.close()
 
     def run_command(self, command):
+        """
+        Parse and execute a CLI command by sending the appropriate request to the server.
+
+        Args:
+            command (str): The command string entered by the user.
+        Returns:
+            bool or None: False if the command is 'exit', otherwise None.
+        """
         parts = command.split()
         cmd = parts[0]
         if cmd == "help":
