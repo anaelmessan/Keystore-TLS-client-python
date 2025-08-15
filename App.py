@@ -1,14 +1,5 @@
 import Controller
 
-
-def read_psk(byte):
-    try:
-        byte_data = bytes.fromhex(byte)
-    except ValueError as e:
-        print("Invalid hex string:", e)
-    return byte_data
-
-
 def main():
     controller = Controller.Controller()
     while True:
