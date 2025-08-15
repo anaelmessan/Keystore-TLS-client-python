@@ -62,6 +62,9 @@ class CLIInterface:
 
     def exit(self):
         self.server_socket.close()
+        print("[+] Closing connection to server...")
+        print(self.server_socket.receive().decode().strip())
+        print("[+] Exiting CLI...")
 
     def run_command(self, command):
         """

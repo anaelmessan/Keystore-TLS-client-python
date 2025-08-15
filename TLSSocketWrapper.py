@@ -73,12 +73,12 @@ class TLSSocketWrapper:
         self.__ssock.send(data)
 
     def receive(self):
-        #TODO: Exception handling
         return self.__ssock.recv()
 
     def close(self):
-        #TODO
-        pass
+        data = f'?02\n'.encode('utf-8')
+        self.__ssock.send(data)
+        return False
 
     def __str__(self):
         return ""
