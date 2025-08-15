@@ -7,7 +7,7 @@ import re
 class Controller:
     def __init__(self):
         self.CLI = CLI_Interface.CLIInterface()
-        self.servernames = ReadConfig.dotenv_read_servername()
+        self.servernames = ReadConfig.dotenv_read_servernames()
         self.indexvalue = 0
         self.server_socket = self.attempt_connect()
 
@@ -28,7 +28,7 @@ class Controller:
         if not attempt:
             return False
         else:
-            return True
+            return attempt
 
     def attempt_connect(self):
         """

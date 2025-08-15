@@ -36,16 +36,19 @@ class TLSSocketWrapper:
             raise Exception("Hostname or port not set")
         sock = socket.create_connection((hostname, port), timeout=10)
         
+        success = False
         try:
             print(self.__hostname)
             self.__ssock = self.__context.wrap_socket(sock, server_hostname=self.__servername)
             print(f"✅ Connected using {self.__ssock.version()}")
+            
         except Exception as e:
             sock.close()
             raise Exception(f"TLS handshake failed: {e}")
         
+        
         #TODO
-        return True
+        return self
 
     def read(self, record_number):
         """
