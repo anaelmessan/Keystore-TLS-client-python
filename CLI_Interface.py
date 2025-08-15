@@ -1,9 +1,7 @@
-import TLSSocketWrapper
-import re
-
 class CLIInterface:
-    def __init__(self, server: TLSSocketWrapper.TLSSocketWrapper):
-        self.server_socket = server
+    def __init__(self):
+        # No attributes to initialize
+        pass
 
     def start_attempt(self, server_name):
         """Prints start and connection attempt messages."""
@@ -48,17 +46,6 @@ class CLIInterface:
         Prints a message indicating a successful command operation.
         """
         print(f'[*] {response}')
-
-    def read(self, record_number):
-        """
-        Read a bit string from the specified record number by sending a request to the server.
-
-        Args:
-            record_number (int): The record number to read from.
-        """
-        print(f"[*] Reading...")
-        self.server_socket.read(record_number)
-        print(f'[*] {self.server_socket.receive().decode().strip()}')
 
     def exit(self):
         """Prints exit messages for the CLI."""
