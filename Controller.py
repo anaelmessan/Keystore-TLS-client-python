@@ -1,11 +1,11 @@
 import TLSSocketWrapper
-import CLI_Interface
+import CLI_Interface_Abstract
 import ReadConfig
 import re
 
 
 class Controller:
-    def __init__(self, cli=CLI_Interface.CLIInterface()):
+    def __init__(self, cli):
         self.CLI = cli
         self.servernames = ReadConfig.dotenv_read_servernames()
         self.indexvalue = 0

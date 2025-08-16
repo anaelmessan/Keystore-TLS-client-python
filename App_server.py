@@ -5,6 +5,17 @@ import sys
 HOST = "0.0.0.0"  # Listen on all interfaces
 DEFAULT_PORT = 5123
 
+# TODO:
+# <...client socket initialization>
+# controller = Controller.Controller(CLIInterfaceServer(client_socket))   #Put this somewhere after each distant client connection
+# #Do this then :
+# while True:
+#     command = input("Enter command: ")  #here retrieve command from socket
+#     status = controller.run_command(command)
+#     if status is False:
+#         break
+
+
 def handle_client(conn, addr):
     print(f"[+] New connection from {addr}")
     with conn:
