@@ -2,8 +2,11 @@
 Setup .venv, compile OpenSSL:
 > make install  
 
-Run the app:  
-> make run
+Run the client app:  
+> make run_client
+
+Run the server (default port : 5123):
+> make run_server <SERV_PORT=_PORT_>
 
 ### More infos
 Requirements :
