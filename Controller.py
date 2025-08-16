@@ -5,8 +5,8 @@ import re
 
 
 class Controller:
-    def __init__(self):
-        self.CLI = CLI_Interface.CLIInterface()
+    def __init__(self, cli=CLI_Interface.CLIInterface()):
+        self.CLI = cli
         self.servernames = ReadConfig.dotenv_read_servernames()
         self.indexvalue = 0
         self.server_socket = self.attempt_connect()
