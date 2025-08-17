@@ -5,10 +5,10 @@ $(TARGET):
 	./openssl.sh
 
 run_client:
-	LD_LIBRARY_PATH=$(PATCHED_OPENSSL_PATH) python App.py
+	LD_LIBRARY_PATH=$(PATCHED_OPENSSL_PATH) .venv/bin/python App.py
 
 run_server:
-	LD_LIBRARY_PATH=$(PATCHED_OPENSSL_PATH) python App_server.py $(SERV_PORT)
+	LD_LIBRARY_PATH=$(PATCHED_OPENSSL_PATH) .venv/bin/python App_server.py $(SERV_PORT)
 
 clean:
 	rm -r $(PATCHED_OPENSSL_PATH)
@@ -18,7 +18,6 @@ compile: $(TARGET)
 .venv/:
 	python3 -m venv .venv
 	.venv/bin/pip install -r requirements.txt
-	touch .venv/bin/activate
 
 setup: .venv/
 
