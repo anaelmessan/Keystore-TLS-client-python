@@ -22,8 +22,8 @@ def handle_client(conn, addr):
     print(f"[+] New connection from {addr}")
     controller = Controller(CLIInterfaceServer(conn))
     with conn:
-        conn.send(b"Enter command:")
         while True:
+            conn.send(b"Enter command:")
             command = conn.recv(1024)
             status = controller.run_command(command.decode())
             if status is False:
