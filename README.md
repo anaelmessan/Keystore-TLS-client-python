@@ -4,7 +4,7 @@ Setup .venv, compile OpenSSL:
 
 Run the server (default port : 5123):
 > make run_server <SERV_PORT=_PORT_>  
-> nc <this server IP> <PORT>  
+> nc \<this server IP\> \<PORT\>  
 
 Run the client app (connects to the TLS server, serves you with the client interface):  
 > make run_client
