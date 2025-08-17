@@ -23,8 +23,8 @@ def handle_client(conn, addr):
     controller = Controller(CLIInterfaceServer(conn))
     with conn:
         conn.send(b"Enter command:")
-        command = conn.recv(1024)
         while True:
+            command = conn.recv(1024)
             status = controller.run_command(command.decode())
             if status is False:
                 break
