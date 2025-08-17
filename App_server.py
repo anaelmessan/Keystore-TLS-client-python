@@ -1,6 +1,8 @@
 import socket
 import threading
 import sys
+from CLI_Interface_Server import CLIInterfaceServer
+from Controller import Controller
 
 HOST = "0.0.0.0"  # Listen on all interfaces
 DEFAULT_PORT = 5123
@@ -18,13 +20,14 @@ DEFAULT_PORT = 5123
 
 def handle_client(conn, addr):
     print(f"[+] New connection from {addr}")
+    controller = Controller(CLIInterfaceServer(conn))
     with conn:
+        conn.send(b"Enter command:")
+        command = conn.recv(1024)
         while True:
-            data = conn.recv(1024)
-            if not data:
+            status = controller.run_command(command)
+            if status is False:
                 break
-            print(f"[{addr}] {data.decode(errors='ignore').strip()}")
-            conn.sendall(b"Hello from multi-client Python server!\n")
     print(f"[-] Connection closed: {addr}")
 
 def main():
