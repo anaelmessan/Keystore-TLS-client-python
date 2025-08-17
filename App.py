@@ -1,7 +1,7 @@
 import Controller
-
+from CLI_Interface_Local_Client import CLIInterfaceLocalClient
 def main():
-    controller = Controller.Controller()
+    controller = Controller.Controller(CLIInterfaceLocalClient())
     while True:
         command = input("Enter command: ")
         status = controller.run_command(command)

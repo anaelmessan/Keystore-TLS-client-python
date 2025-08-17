@@ -4,8 +4,11 @@ TARGET = $(PATCHED_OPENSSL_PATH)/libssl.so.3
 $(TARGET):
 	./openssl.sh
 
-run:
+run_client:
 	LD_LIBRARY_PATH=$(PATCHED_OPENSSL_PATH) python App.py
+
+run_server:
+	LD_LIBRARY_PATH=$(PATCHED_OPENSSL_PATH) python App_server.py $(SERV_PORT)
 
 clean:
 	rm -r $(PATCHED_OPENSSL_PATH)
@@ -21,4 +24,4 @@ setup: .venv/
 
 install: .venv/ compile
 
-.PHONY: run clean compile setup install
+.PHONY: run_client run_server clean compile setup install

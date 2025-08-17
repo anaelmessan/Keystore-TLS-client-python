@@ -1,12 +1,12 @@
 import TLSSocketWrapper
-import CLI_Interface
+import CLI_Interface_Abstract
 import ReadConfig
 import re
 
 
 class Controller:
-    def __init__(self):
-        self.CLI = CLI_Interface.CLIInterface()
+    def __init__(self, cli):
+        self.CLI = cli
         self.servernames = ReadConfig.dotenv_read_servernames()
         self.indexvalue = 0
         self.server_socket = self.attempt_connect()
@@ -24,7 +24,11 @@ class Controller:
         # Initialize the TLS socket wrapper
         self.server_socket = TLSSocketWrapper.TLSSocketWrapper(servername, host, port)
         self.server_socket.set_psk(psk)
-        attempt = self.server_socket.connect()
+        try:
+            attempt = self.server_socket.connect()
+        except Exception:
+            return False
+
         if not attempt:
             return False
         else:
@@ -41,7 +45,6 @@ class Controller:
         while attempt is False:
             self.CLI.attempt_failed(servername)
             self.indexvalue += 1
-            servername = self.servernames[self.indexvalue]
             if self.indexvalue < len(self.servernames):
                 servername = self.servernames[self.indexvalue]
                 self.CLI.attempt_reconnect(servername)
@@ -92,6 +95,9 @@ class Controller:
         Returns:
             bool or None: False if the command is 'exit', otherwise None.
         """
+        if not command:
+            self.CLI.invalid_format()
+            return False
         parts = command.split()
         cmd = parts[0]
         if cmd == "help":

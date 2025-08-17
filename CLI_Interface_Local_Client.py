@@ -1,4 +1,6 @@
-class CLIInterface:
+from CLI_Interface_Abstract import CLIInterface
+
+class CLIInterfaceLocalClient(CLIInterface):
     def __init__(self):
         # No attributes to initialize
         pass
