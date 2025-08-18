@@ -49,7 +49,7 @@ class CLIInterfaceServer(CLIInterface):
         """
         Prints a message indicating a successful command operation.
         """
-        self.client_socket.send(f'[*] {response}'.encode("utf-8"))
+        self.client_socket.send(f'[*] {response}\n'.encode("utf-8"))
 
     def exit(self):
         """Prints exit messages for the CLI."""
