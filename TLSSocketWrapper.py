@@ -33,6 +33,7 @@ class TLSSocketWrapper:
         if port is None:
             port = self.__port
         if not hostname or not port:
+            print("Hostname or port not set")
             raise Exception("Hostname or port not set")
         sock = socket.create_connection((hostname, port), timeout=10)
         
@@ -44,6 +45,7 @@ class TLSSocketWrapper:
             
         except Exception as e:
             sock.close()
+            print(f"❌ Connection failed: {e}")
             raise Exception(f"TLS handshake failed: {e}")
         
         
@@ -73,6 +75,21 @@ class TLSSocketWrapper:
             bytes_data (str): The bit string to write.
         """
         data = f'Z{record_number:02x}{bytes_data}\n'.encode('utf-8')
+        self.__ssock.send(data)
+
+    def set_key(self, index_key, bytes_data):
+        data = f't{index_key:02x}{bytes_data}\n'.encode('utf-8')
+        print(data)
+        self.__ssock.send(data)
+    
+    def encrypt(self, index_key, bytes_data):
+        data = f'A{index_key:02x}{bytes_data}\n'.encode('utf-8')
+        print(data)
+        self.__ssock.send(data)
+
+    def decrypt(self, index_key, bytes_data):
+        data = f'a{index_key:02x}{bytes_data}\n'.encode('utf-8')
+        print(data)
         self.__ssock.send(data)
 
     def receive(self):
