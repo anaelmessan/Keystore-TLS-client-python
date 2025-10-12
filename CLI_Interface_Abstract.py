@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
+
 class CLIInterface(ABC):
-    
     @abstractmethod
     def start_attempt(self, server_name):
         pass
@@ -41,7 +41,7 @@ class CLIInterface(ABC):
     @abstractmethod
     def invalid_format(self):
         pass
-    
+
     @abstractmethod
     def invalid_write_args(self):
         pass
@@ -49,11 +49,35 @@ class CLIInterface(ABC):
     @abstractmethod
     def invalid_read_args(self):
         pass
-    
+
     @abstractmethod
     def invalid_record(self):
         pass
 
     @abstractmethod
     def invalid_command(self):
+        pass
+
+    @abstractmethod
+    def invalid_key_index(self):
+        pass
+
+    @abstractmethod
+    def invalid_hexa(self):
+        pass
+
+    @abstractmethod
+    def invalid_setkey_args(self):
+        pass
+
+    @abstractmethod
+    def unexpected_error(self):
+        pass
+
+    @abstractmethod
+    def invalid_encrypt(self):
+        pass
+
+    @abstractmethod
+    def invalid_decrypt(self):
         pass

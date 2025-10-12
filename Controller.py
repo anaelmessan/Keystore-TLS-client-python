@@ -1,5 +1,4 @@
 import TLSSocketWrapper
-import CLI_Interface_Abstract
 import ReadConfig
 import re
 
@@ -82,71 +81,41 @@ class Controller:
         self.server_socket.read(record_number)
         self.CLI.command_success(self.server_socket.receive().decode().strip())
 
-    def is_valid_key(self, key_hex: str) -> bool:
-        if not key_hex:
-            print("No key provided")
+    def is_valid_hexa(self, hexa: str) -> bool:
+        if not hexa:
+            self.CLI.invalid_hexa()
             return False
         try:
-            print("key format: ", key_hex)
-            int(key_hex, 16)
-            return len(key_hex) == 32
-        except:
-            print("Key is not valid hex.", key_hex)
+            int(hexa, 16)
+            if len(hexa) == 32:
+                return True
+            else:
+                self.CLI.invalid_hexa()
+                return False
+        except Exception:
+            self.CLI.unexpected_error()
             return False
 
-    def set_key(self, index_key, bytes_data):
-        check = self.is_valid_key(bytes_data)
-        print(check)
-        print("index_key: ", index_key)
-        print("bytes_data: ", bytes_data)
-        match check:
-            case True:
-                self.CLI.command_attempt()
-                self.server_socket.set_key(index_key, bytes_data)
-                self.CLI.command_success(self.server_socket.receive().decode().strip())
-                pass
-            case False:
-                self.CLI.invalid_format()
-                pass
-            case _:
-                self.CLI.unexpected_error()
-                pass
+    def set_key(self, index_key: str, bytes_data: str):
+        valid_data = self.is_valid_hexa(bytes_data)
+        if valid_data:
+            self.CLI.command_attempt()
+            self.server_socket.set_key(index_key, bytes_data)
+            self.CLI.command_success(self.server_socket.receive().decode().strip())
 
-    def encrypt(self, index_key, bytes_data):
-        check = self.is_valid_key(bytes_data)
-        print(check)
-        print("index_key: ", index_key)
-        print("bytes_data: ", bytes_data)
-        match check:
-            case True:
-                self.CLI.command_attempt()
-                self.server_socket.encrypt(index_key, bytes_data)
-                self.CLI.command_success(self.server_socket.receive().decode().strip())
-                pass
-            case False:
-                self.CLI.invalid_format()
-                pass
-            case _:
-                self.CLI.unexpected_error()
-                pass
+    def encrypt(self, index_key: str, bytes_data: str):
+        valid_data = self.is_valid_hexa(bytes_data)
+        if valid_data:
+            self.CLI.command_attempt()
+            self.server_socket.encrypt(index_key, bytes_data)
+            self.CLI.command_success(self.server_socket.receive().decode().strip())
 
-    def decrypt(self, index_key, bytes_data):
-        check = self.is_valid_key(bytes_data)
-        print(check)
-        print("index_key: ", index_key)
-        print("bytes_data: ", bytes_data)
-        match check:
-            case True:
-                self.CLI.command_attempt()
-                self.server_socket.decrypt(index_key, bytes_data)
-                self.CLI.command_success(self.server_socket.receive().decode().strip())
-                pass
-            case False:
-                self.CLI.invalid_format()
-                pass
-            case _:
-                self.CLI.unexpected_error()
-                pass
+    def decrypt(self, index_key: str, bytes_data: str):
+        valid_data = self.is_valid_hexa(bytes_data)
+        if valid_data:
+            self.CLI.command_attempt()
+            self.server_socket.decrypt(index_key, bytes_data)
+            self.CLI.command_success(self.server_socket.receive().decode().strip())
 
     def exit(self):
         """Close the server socket and exit the CLI."""
@@ -198,40 +167,45 @@ class Controller:
             self.read(record_number)
         elif cmd == "define":
             if len(parts) != 3:
-                # ToDo add
-                # self.CLI.invalid_setkey_args()
+                self.CLI.invalid_setkey_args()
                 return
-            match = re.search(r"key#(\d+)", parts[1])
+            match = re.search(r"key#(\d{2})", parts[1])
             if not match:
-                self.CLI.invalid_record()
+                self.CLI.invalid_key_index()
                 return
             index_key = int(match.group(1))
-            bytes_data = parts[2]
-            self.set_key(index_key, bytes_data)
+            if index_key >= 4:
+                self.CLI.invalid_key_index()
+            else:
+                bytes_data = parts[2]
+                self.set_key(index_key, bytes_data)
         elif cmd == "encrypt":
             if len(parts) != 3:
-                # ToDo add
-                # self.CLI.invalid_setkey_args()
+                self.CLI.invalid_encrypt()
                 return
-            match = re.search(r"key#(\d+)", parts[1])
+            match = re.search(r"key#(\d{2})", parts[1])
             if not match:
-                self.CLI.invalid_record()
+                self.CLI.invalid_key_index()
                 return
             index_key = int(match.group(1))
-            bytes_data = parts[2]
-            self.encrypt(index_key, bytes_data)
+            if index_key >= 4:
+                self.CLI.invalid_key_index()
+            else:
+                bytes_data = parts[2]
+                self.encrypt(index_key, bytes_data)
         elif cmd == "decrypt":
             if len(parts) != 3:
-                # ToDo add
-                # self.CLI.invalid_setkey_args()
+                self.CLI.invalid_decrypt()
                 return
-            match = re.search(r"key#(\d+)", parts[1])
+            match = re.fullmatch(r"key#(\d{2})", parts[1])
             if not match:
-                self.CLI.invalid_record()
+                self.CLI.invalid_key_index()
                 return
             index_key = int(match.group(1))
-            bytes_data = parts[2]
-            self.decrypt(index_key, bytes_data)
-
+            if index_key >= 4:
+                self.CLI.invalid_key_index()
+            else:
+                bytes_data = parts[2]
+                self.decrypt(index_key, bytes_data)
         else:
             self.CLI.invalid_command()
