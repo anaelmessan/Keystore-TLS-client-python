@@ -1,4 +1,4 @@
-from CLI_Interface_Abstract import CLIInterface
+from interface.CLI_Interface_Abstract import CLIInterface
 
 
 class CLIInterfaceLocalClient(CLIInterface):

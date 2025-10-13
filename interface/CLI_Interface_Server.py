@@ -1,4 +1,4 @@
-from CLI_Interface_Abstract import CLIInterface
+from interface.CLI_Interface_Abstract import CLIInterface
 
 # TODO : send the strings through the socket instead of printing them
 
@@ -99,42 +99,52 @@ class CLIInterfaceServer(CLIInterface):
         self.client_socket.send("[-] Unknown command\n".encode("utf-8"))
 
     def invalid_key_index(self):
-        self.client_socket.send("[-] Error: Invalid key number format.\n").encode(
-            "utf-8"
+        self.client_socket.send(
+            "[-] Error: Invalid key number format.\n".encode("utf-8")
         )
         self.client_socket.send(
-            "[*] Format: key#<xy>, <xy> is the key index (00, 01, 02, 03)\n"
-        ).encode("utf-8")
+            "[*] Format: key#<xy>, <xy> is the key index (00, 01, 02, 03)\n".encode(
+                "utf-8"
+            )
+        )
 
     def invalid_hexa(self):
         self.client_socket.send(
-            "[-] Error: Invalid AES key, must be a 32-character hexadecimal.\n"
-        ).encode("utf-8")
+            "[-] Error: Invalid AES key, must be a 32-character hexadecimal.\n".encode(
+                "utf-8"
+            )
+        )
 
     def invalid_setkey_args(self):
         self.client_socket.send(
-            "[-] Error: 'define' command requires key index and hexadecimal key\n"
-        ).encode("utf-8")
-        self.client_socket.send("[*] Usage: define key#<xy> <hex[32]>\n").encode(
-            "utf-8"
+            "[-] Error: 'define' command requires key index and hexadecimal key\n".encode(
+                "utf-8"
+            )
+        )
+        self.client_socket.send(
+            "[*] Usage: define key#<xy> <hex[32]>\n".encode("utf-8")
         )
 
     def unexpected_error(self, error_msg):
-        self.client_socket.send("[-] Error: Unexpected Error\n").encode("utf-8")
-        self.client_socket.send(error_msg + "\n").encode("utf-8")
+        self.client_socket.send("[-] Error: Unexpected Error\n".encode("utf-8"))
+        self.client_socket.send(error_msg + "\n".encode("utf-8"))
 
     def invalid_encrypt(self):
         self.client_socket.send(
-            "[-] Error: 'encrypt' command requires key index and hexadecimal data\n"
-        ).encode("utf-8")
-        self.client_socket.send("[*] Usage: encrypt key#<xy> <hex[32]>\n").encode(
-            "utf-8"
+            "[-] Error: 'encrypt' command requires key index and hexadecimal data\n".encode(
+                "utf-8"
+            )
+        )
+        self.client_socket.send(
+            "[*] Usage: encrypt key#<xy> <hex[32]>\n".encode("utf-8")
         )
 
     def invalid_decrypt(self):
         self.client_socket.send(
-            "[-] Error: 'decrypt' command requires key index and hexadecimal data\n"
-        ).encode("utf-8")
-        self.client_socket.send("[*] Usage: decrypt key#<xy> <hex[32]>\n").encode(
-            "utf-8"
+            "[-] Error: 'decrypt' command requires key index and hexadecimal data\n".encode(
+                "utf-8"
+            )
+        )
+        self.client_socket.send(
+            "[*] Usage: decrypt key#<xy> <hex[32]>\n".encode("utf-8")
         )

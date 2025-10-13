@@ -1,5 +1,5 @@
-import TLSSocketWrapper
-import ReadConfig
+from core.TLSSocketWrapper import TLSSocketWrapper
+import core.ReadConfig as ReadConfig
 import re
 
 
@@ -21,7 +21,7 @@ class Controller:
         psk = ReadConfig.dotenv_read_psk()
 
         # Initialize the TLS socket wrapper
-        self.server_socket = TLSSocketWrapper.TLSSocketWrapper(servername, host, port)
+        self.server_socket = TLSSocketWrapper(servername, host, port)
         self.server_socket.set_psk(psk)
         try:
             attempt = self.server_socket.connect()
@@ -93,7 +93,7 @@ class Controller:
                 self.CLI.invalid_hexa()
                 return False
         except Exception:
-            self.CLI.unexpected_error()
+            self.CLI.invalid_hexa()
             return False
 
     def set_key(self, index_key: str, bytes_data: str):

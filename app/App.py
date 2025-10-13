@@ -1,5 +1,7 @@
-import Controller
-from CLI_Interface_Local_Client import CLIInterfaceLocalClient
+import core.Controller as Controller
+from interface.CLI_Interface_Local_Client import CLIInterfaceLocalClient
+
+
 def main():
     controller = Controller.Controller(CLIInterfaceLocalClient())
     while True:

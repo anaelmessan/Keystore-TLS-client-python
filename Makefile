@@ -5,10 +5,10 @@ $(TARGET):
 	./openssl.sh
 
 run_client:
-	LD_LIBRARY_PATH=$(PATCHED_OPENSSL_PATH) .venv/bin/python App.py
+	LD_LIBRARY_PATH=$(PATCHED_OPENSSL_PATH) .venv/bin/python -m app.App
 
 run_server:
-	LD_LIBRARY_PATH=$(PATCHED_OPENSSL_PATH) .venv/bin/python App_server.py $(SERV_PORT)
+	LD_LIBRARY_PATH=$(PATCHED_OPENSSL_PATH) .venv/bin/python -m app.App_server $(SERV_PORT)
 
 clean:
 	rm -r $(PATCHED_OPENSSL_PATH)

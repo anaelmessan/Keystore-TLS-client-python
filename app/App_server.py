@@ -1,8 +1,8 @@
 import socket
 import threading
 import sys
-from CLI_Interface_Server import CLIInterfaceServer
-from Controller import Controller
+from interface.CLI_Interface_Server import CLIInterfaceServer
+from core.Controller import Controller
 
 HOST = "0.0.0.0"  # Listen on all interfaces
 DEFAULT_PORT = 5123
@@ -30,6 +30,7 @@ def handle_client(conn, addr):
                 break
     print(f"[-] Connection closed: {addr}")
 
+
 def main():
     try:
         port = int(sys.argv[1])
@@ -37,6 +38,7 @@ def main():
         port = DEFAULT_PORT
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         s.bind((HOST, port))
         s.listen()
         print(f"[*] Listening on {HOST}:{port}...")
@@ -47,6 +49,7 @@ def main():
             thread = threading.Thread(target=handle_client, args=(conn, addr))
             thread.daemon = True  # So threads close when main program ends
             thread.start()
+
 
 if __name__ == "__main__":
     main()
