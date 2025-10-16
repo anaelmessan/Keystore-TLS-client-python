@@ -40,17 +40,13 @@ class TLSSocketWrapper:
             raise Exception("Hostname or port not set")
         sock = socket.create_connection((hostname, port), timeout=10)
 
-        success = False
         try:
-            print(self.__hostname)
             self.__ssock = self.__context.wrap_socket(
                 sock, server_hostname=self.__servername
             )
-            print(f"✅ Connected using {self.__ssock.version()}")
 
         except Exception as e:
             sock.close()
-            print(f"❌ Connection failed: {e}")
             raise Exception(f"TLS handshake failed: {e}")
 
         # TODO
@@ -92,7 +88,7 @@ class TLSSocketWrapper:
         self.__ssock.send(data)
 
     def decrypt(self, index_key, bytes_data):
-        data = f"a{index_key:02x}{bytes_data}\n".encode("utf-8")
+        data = f".a{index_key:02x}{bytes_data}\n".encode("utf-8")
         # print(data)
         self.__ssock.send(data)
 
@@ -102,7 +98,7 @@ class TLSSocketWrapper:
     def close(self):
         data = "?02\n".encode("utf-8")
         self.__ssock.send(data)
-        return False
+        self.__ssock.close()
 
     def __str__(self):
         return ""

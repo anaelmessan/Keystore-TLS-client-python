@@ -1,6 +1,6 @@
 from core.TLSSocketWrapper import TLSSocketWrapper
 import core.ReadConfig as ReadConfig
-import re
+import re, time
 
 
 class Controller:
@@ -8,7 +8,8 @@ class Controller:
         self.CLI = cli
         self.servernames = ReadConfig.dotenv_read_servernames()
         self.indexvalue = 0
-        self.server_socket = self.attempt_connect()
+        self.server_socket = ""
+        self.attempt_connect()
 
     def run_server(self, servername):
         """
@@ -19,20 +20,14 @@ class Controller:
         host = ReadConfig.dotenv_read_host()
         port = ReadConfig.dotenv_read_port()
         psk = ReadConfig.dotenv_read_psk()
-
         # Initialize the TLS socket wrapper
         self.server_socket = TLSSocketWrapper(servername, host, port)
         self.server_socket.set_psk(psk)
         try:
-            attempt = self.server_socket.connect()
+            self.server_socket.connect()
+            return True
         except Exception:
             return False
-
-        if not attempt:
-            print("not attempt: ", attempt)
-            return False
-        else:
-            return attempt
 
     def attempt_connect(self):
         """
@@ -53,7 +48,7 @@ class Controller:
                 self.CLI.no_more_servers()
                 exit()
         self.CLI.success_connect(servername)
-        return attempt
+        self.server_socket.close()
 
     def help(self):
         self.CLI.help()
@@ -119,7 +114,7 @@ class Controller:
 
     def exit(self):
         """Close the server socket and exit the CLI."""
-        self.server_socket.close()
+        # self.server_socket.close()
         self.CLI.exit()
 
     def run_command(self, command):
@@ -144,68 +139,70 @@ class Controller:
         elif "\r\n" in command or "`" in command:
             self.CLI.invalid_format()
             return False
-        elif cmd == "write":
-            if len(parts) != 3:
-                self.CLI.invalid_write_args()
-                return
-            match = re.search(r"#(\d+)", parts[1])
-            if not match:
-                self.CLI.invalid_record()
-                return
-            record_number = int(match.group(1))
-            bytes_data = parts[2]
-            self.write(record_number, bytes_data)
-        elif cmd == "read":
-            if len(parts) != 2:
-                self.CLI.invalid_read_args()
-                return
-            match = re.search(r"#(\d+)", parts[1])
-            if not match:
-                self.CLI.invalid_record()
-                return
-            record_number = int(match.group(1))
-            self.read(record_number)
-        elif cmd == "define":
-            if len(parts) != 3:
-                self.CLI.invalid_setkey_args()
-                return
-            match = re.search(r"key#(\d{2})", parts[1])
-            if not match:
-                self.CLI.invalid_key_index()
-                return
-            index_key = int(match.group(1))
-            if index_key >= 4:
-                self.CLI.invalid_key_index()
-            else:
-                bytes_data = parts[2]
-                self.set_key(index_key, bytes_data)
-        elif cmd == "encrypt":
-            if len(parts) != 3:
-                self.CLI.invalid_encrypt()
-                return
-            match = re.search(r"key#(\d{2})", parts[1])
-            if not match:
-                self.CLI.invalid_key_index()
-                return
-            index_key = int(match.group(1))
-            if index_key >= 4:
-                self.CLI.invalid_key_index()
-            else:
-                bytes_data = parts[2]
-                self.encrypt(index_key, bytes_data)
-        elif cmd == "decrypt":
-            if len(parts) != 3:
-                self.CLI.invalid_decrypt()
-                return
-            match = re.fullmatch(r"key#(\d{2})", parts[1])
-            if not match:
-                self.CLI.invalid_key_index()
-                return
-            index_key = int(match.group(1))
-            if index_key >= 4:
-                self.CLI.invalid_key_index()
-            else:
-                bytes_data = parts[2]
-                self.decrypt(index_key, bytes_data)
         else:
-            self.CLI.invalid_command()
+            self.server_socket.connect()
+            if cmd == "write":
+                if len(parts) != 3:
+                    self.CLI.invalid_write_args()
+                    return
+                match = re.search(r"#(\d+)", parts[1])
+                if not match:
+                    self.CLI.invalid_record()
+                    return
+                record_number = int(match.group(1))
+                bytes_data = parts[2]
+                self.write(record_number, bytes_data)
+            elif cmd == "read":
+                if len(parts) != 2:
+                    self.CLI.invalid_read_args()
+                    return
+                match = re.search(r"#(\d+)", parts[1])
+                if not match:
+                    self.CLI.invalid_record()
+                    return
+                record_number = int(match.group(1))
+                self.read(record_number)
+            elif cmd == "define":
+                if len(parts) != 3:
+                    self.CLI.invalid_setkey_args()
+                    return
+                match = re.search(r"key#(\d{2})", parts[1])
+                if not match:
+                    self.CLI.invalid_key_index()
+                    return
+                index_key = int(match.group(1))
+                if index_key >= 4:
+                    self.CLI.invalid_key_index()
+                else:
+                    bytes_data = parts[2]
+                    self.set_key(index_key, bytes_data)
+            elif cmd == "encrypt":
+                if len(parts) != 3:
+                    self.CLI.invalid_encrypt()
+                    return
+                match = re.search(r"key#(\d{2})", parts[1])
+                if not match:
+                    self.CLI.invalid_key_index()
+                    return
+                index_key = int(match.group(1))
+                if index_key >= 4:
+                    self.CLI.invalid_key_index()
+                else:
+                    bytes_data = parts[2]
+                    self.encrypt(index_key, bytes_data)
+            elif cmd == "decrypt":
+                if len(parts) != 3:
+                    self.CLI.invalid_decrypt()
+                    return
+                match = re.fullmatch(r"key#(\d{2})", parts[1])
+                if not match:
+                    self.CLI.invalid_key_index()
+                    return
+                index_key = int(match.group(1))
+                if index_key >= 4:
+                    self.CLI.invalid_key_index()
+                else:
+                    bytes_data = parts[2]
+                    self.decrypt(index_key, bytes_data)
+            else:
+                self.CLI.invalid_command()
