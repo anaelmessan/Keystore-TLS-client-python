@@ -52,6 +52,10 @@ class TLSSocketWrapper:
         # TODO
         return self
 
+    def echo(self, msg):
+        data = f"?01{msg}\n".encode("utf-8")
+        self.__ssock.send(data)
+
     def read(self, record_number):
         """
         Reads the bit string stored at the specified record number (location 00 of key17).
@@ -98,6 +102,9 @@ class TLSSocketWrapper:
     def close(self):
         data = "?02\n".encode("utf-8")
         self.__ssock.send(data)
+        self.__ssock.close()
+
+    def close_socket(self):
         self.__ssock.close()
 
     def __str__(self):

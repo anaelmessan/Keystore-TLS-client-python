@@ -1,6 +1,6 @@
 from core.TLSSocketWrapper import TLSSocketWrapper
 import core.ReadConfig as ReadConfig
-import re, time
+import re
 
 
 class Controller:
@@ -48,7 +48,18 @@ class Controller:
                 self.CLI.no_more_servers()
                 exit()
         self.CLI.success_connect(servername)
-        self.server_socket.close()
+        # self.server_socket.close()
+
+    def is_socket_connected(self):
+        try:
+            self.server_socket.echo("test")
+            data = self.server_socket.receive().decode()
+            if data == "":
+                self.server_socket.close_socket()
+                self.server_socket.connect()
+        except Exception as e:
+            print(e)
+            exit()
 
     def help(self):
         self.CLI.help()
@@ -126,6 +137,7 @@ class Controller:
         Returns:
             bool or None: False if the command is 'exit', otherwise None.
         """
+        self.is_socket_connected()
         if not command:
             self.CLI.invalid_format()
             return False
@@ -140,7 +152,7 @@ class Controller:
             self.CLI.invalid_format()
             return False
         else:
-            self.server_socket.connect()
+            # self.server_socket.connect()
             if cmd == "write":
                 if len(parts) != 3:
                     self.CLI.invalid_write_args()
