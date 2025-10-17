@@ -92,7 +92,7 @@ class TLSSocketWrapper:
         self.__ssock.send(data)
 
     def decrypt(self, index_key, bytes_data):
-        data = f".a{index_key:02x}{bytes_data}\n".encode("utf-8")
+        data = f"a{index_key:02x}{bytes_data}\n".encode("utf-8")
         # print(data)
         self.__ssock.send(data)
 
