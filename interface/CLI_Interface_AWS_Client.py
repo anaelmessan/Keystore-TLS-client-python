@@ -1,5 +1,4 @@
 from interface.CLI_Interface_Abstract import CLIInterface
-from aws_client_utils.constants import AWS_CLIENT_RESPONSE_CODES as RESPCODE
 
 # TODO : send the strings through the socket instead of printing them
 
