@@ -8,6 +8,9 @@ run_client:
 	LD_LIBRARY_PATH=$(PATCHED_OPENSSL_PATH) .venv/bin/python -m app.App
 
 run_server:
+	LD_LIBRARY_PATH=$(PATCHED_OPENSSL_PATH) .venv/bin/python -m app.App_server_for_AWS $(SERV_PORT)
+
+run_nc_server:
 	LD_LIBRARY_PATH=$(PATCHED_OPENSSL_PATH) .venv/bin/python -m app.App_server $(SERV_PORT)
 
 clean:

@@ -11,10 +11,6 @@ To set up the python venv and compile OpenSSL, do:
 > make install
 
 ### Running
-Run the server (default port : 5123):
-> make run_server <SERV_PORT=_PORT_>  
-> nc \<this server IP\> \<PORT\>  
-
 A `.env` file is needed
 ```
 HOST=<IP>
@@ -22,6 +18,21 @@ PORT=<PORT>
 SERVERNAMES=<hostname.com, hostname2.com, ...>
 PSK=<HEX>
 ```
+
+#### Running the server 
+Run the server (default port : 6123):
+> make run_server <SERV_PORT=_PORT_>  
+
+Server reply format : \[success (1B)\]\[key (16B)]  
+If the first byte is 0x00 then the request succeeded and the rest is a valid key.  
+If it is non-zero, then this is an error code, the rest of the message is then missing or invalid.
+
+#### Running the NC server
+Alternatively, you can run the server and use it with netcat
+Run the server (default port : 5123):
+> make run_nc_server <SERV_PORT=_PORT_>  
+> nc \<this server IP\> \<PORT\>
+
 
 ### Notes
 The server can handle multiple simultaneous clients, even though the distant TLS server might not.
