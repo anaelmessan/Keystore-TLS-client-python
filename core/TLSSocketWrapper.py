@@ -103,5 +103,10 @@ class TLSSocketWrapper:
     def close_socket(self):
         self.__ssock.close()
 
+    def send(self, bytes_data):
+        # celle qui va gérer les trucs des ip je pense
+
+        self.__ssock
+
     def __str__(self):
         return ""

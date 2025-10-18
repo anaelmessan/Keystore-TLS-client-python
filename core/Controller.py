@@ -4,12 +4,14 @@ from command import *
 
 
 class Controller:
-    def __init__(self, cli):
+    def __init__(self, cli, auto=True):
         self.CLI = cli
+        self.active_servername = ""
         self.servernames = ReadConfig.dotenv_read_servernames()
         self.indexvalue = 0
         self.server_socket = ""
-        self.attempt_connect()
+        if auto == True:
+            self.attempt_connect()  # connexion auto
 
     def run_server(self, servername):
         """
@@ -25,6 +27,7 @@ class Controller:
         self.server_socket.set_psk(psk)
         try:
             self.server_socket.connect()
+            self.active_servername = servername
             return True
         except Exception:
             return False
@@ -68,7 +71,7 @@ class Controller:
         self.server_socket.close()
         self.CLI.exit()
 
-    def run_command(self, command):
+    def run_command(self, command, servername=None):
         """
         Parse and execute a CLI command by sending the appropriate request to the server.
 
@@ -83,8 +86,12 @@ class Controller:
         elif "\r\n" in command or "`" in command:
             self.CLI.invalid_format()
             return False
-
-        self.is_socket_connected()
+        if self.server_socket == "":
+            servername = f"key{servername}.com"
+            self.run_server(servername)
+            print("serveur active: ", self.active_servername)
+        else:
+            self.is_socket_connected()
         cmdhandler = {
             "define": SetKeyHandler(),
             "decrypt": DecryptHandler(),

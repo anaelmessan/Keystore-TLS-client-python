@@ -8,7 +8,6 @@ class CLIInterfaceAWS(CLIInterface):
     def __init__(self, aws_socket):
         self.client_socket = aws_socket
 
-
     def start_attempt(self, server_name):
         pass
 
@@ -27,7 +26,6 @@ class CLIInterfaceAWS(CLIInterface):
         # self.client_socket.send("[-] Cannot connect to any server.\n".encode("utf-8"))
         # self.client_socket.send("[-] Exiting...\n".encode("utf-8"))
         pass
-
 
     def success_connect(self, server_name):
         """Prints a message when connection to server is successful."""
@@ -62,11 +60,13 @@ class CLIInterfaceAWS(CLIInterface):
         """
         Prints a message indicating a successful command operation.
         """
-        if response is not 'OK':
-
-            self.client_socket.send(bytes.fromhex('00' + response))
-        else:
-            pass
+        try:
+            if response is not "OK":
+                self.client_socket.send(bytes.fromhex("00" + response))
+            else:
+                pass
+        except Exception as e:
+            print("Le serveur a du être fermé\n", e)
 
     def exit(self):
         """Prints exit messages for the CLI."""
