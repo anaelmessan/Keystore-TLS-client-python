@@ -16,7 +16,7 @@ class CLIInterfaceAWS(CLIInterface):
         # self.client_socket.send(
         #     f"[-] Failed to connect to server {server_name}.\n".encode("utf-8")
         # )
-        pass
+        print(f"{server_name} isn't available.")
 
     def attempt_reconnect(self, server_name):
         pass

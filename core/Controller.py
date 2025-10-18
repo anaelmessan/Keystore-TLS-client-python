@@ -88,8 +88,11 @@ class Controller:
             return False
         if self.server_socket == "":
             servername = f"key{servername}.com"
-            self.run_server(servername)
-            print("serveur active: ", self.active_servername)
+            if self.run_server(servername):
+                print("serveur active: ", self.active_servername)
+            else:
+                self.CLI.attempt_failed(servername)
+                return False
         else:
             self.is_socket_connected()
         cmdhandler = {
