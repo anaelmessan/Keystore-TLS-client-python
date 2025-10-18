@@ -2,6 +2,7 @@ psk
 openssl-3.5.*/
 openssl-3.5.2.tar.gz
 __pycache__/
+**/__pycache__/
 *.pyc
 config.py
 .env

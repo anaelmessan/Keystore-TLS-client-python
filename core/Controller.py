@@ -1,6 +1,6 @@
 from core.TLSSocketWrapper import TLSSocketWrapper
 import core.ReadConfig as ReadConfig
-import re
+from command import *
 
 
 class Controller:
@@ -48,7 +48,6 @@ class Controller:
                 self.CLI.no_more_servers()
                 exit()
         self.CLI.success_connect(servername)
-        # self.server_socket.close()
 
     def is_socket_connected(self):
         try:
@@ -64,68 +63,9 @@ class Controller:
     def help(self):
         self.CLI.help()
 
-    def write(self, record_number, bytes_data):
-        """
-        Write a bit string to the specified record number by sending a request to the server.
-
-        Args:
-            record_number (int): The record number to write to.
-            bytes_data (str): The bit string to write.
-        """
-        self.CLI.command_attempt()
-        self.server_socket.write(record_number, bytes_data)
-        self.CLI.command_success(self.server_socket.receive().decode().strip())
-
-    def read(self, record_number):
-        """
-        Read a bit string from the specified record number by sending a request to the server.
-
-        Args:
-            record_number (int): The record number to read from.
-        """
-        self.CLI.command_attempt()
-        self.server_socket.read(record_number)
-        self.CLI.command_success(self.server_socket.receive().decode().strip())
-
-    def is_valid_hexa(self, hexa: str) -> bool:
-        if not hexa:
-            self.CLI.invalid_hexa()
-            return False
-        try:
-            int(hexa, 16)
-            if len(hexa) == 32:
-                return True
-            else:
-                self.CLI.invalid_hexa()
-                return False
-        except Exception:
-            self.CLI.invalid_hexa()
-            return False
-
-    def set_key(self, index_key: str, bytes_data: str):
-        valid_data = self.is_valid_hexa(bytes_data)
-        if valid_data:
-            self.CLI.command_attempt()
-            self.server_socket.set_key(index_key, bytes_data)
-            self.CLI.command_success(self.server_socket.receive().decode().strip())
-
-    def encrypt(self, index_key: str, bytes_data: str):
-        valid_data = self.is_valid_hexa(bytes_data)
-        if valid_data:
-            self.CLI.command_attempt()
-            self.server_socket.encrypt(index_key, bytes_data)
-            self.CLI.command_success(self.server_socket.receive().decode().strip())
-
-    def decrypt(self, index_key: str, bytes_data: str):
-        valid_data = self.is_valid_hexa(bytes_data)
-        if valid_data:
-            self.CLI.command_attempt()
-            self.server_socket.decrypt(index_key, bytes_data)
-            self.CLI.command_success(self.server_socket.receive().decode().strip())
-
     def exit(self):
         """Close the server socket and exit the CLI."""
-        # self.server_socket.close()
+        self.server_socket.close()
         self.CLI.exit()
 
     def run_command(self, command):
@@ -137,84 +77,35 @@ class Controller:
         Returns:
             bool or None: False if the command is 'exit', otherwise None.
         """
-        self.is_socket_connected()
         if not command:
             self.CLI.invalid_format()
-            return False
-        parts = command.split()
-        cmd = parts[0]
-        if cmd == "help":
-            self.help()
-        elif cmd == "exit":
-            self.exit()
             return False
         elif "\r\n" in command or "`" in command:
             self.CLI.invalid_format()
             return False
-        else:
-            # self.server_socket.connect()
-            if cmd == "write":
-                if len(parts) != 3:
-                    self.CLI.invalid_write_args()
-                    return
-                match = re.search(r"#(\d+)", parts[1])
-                if not match:
-                    self.CLI.invalid_record()
-                    return
-                record_number = int(match.group(1))
-                bytes_data = parts[2]
-                self.write(record_number, bytes_data)
-            elif cmd == "read":
-                if len(parts) != 2:
-                    self.CLI.invalid_read_args()
-                    return
-                match = re.search(r"#(\d+)", parts[1])
-                if not match:
-                    self.CLI.invalid_record()
-                    return
-                record_number = int(match.group(1))
-                self.read(record_number)
-            elif cmd == "define":
-                if len(parts) != 3:
-                    self.CLI.invalid_setkey_args()
-                    return
-                match = re.search(r"key#(\d{2})", parts[1])
-                if not match:
-                    self.CLI.invalid_key_index()
-                    return
-                index_key = int(match.group(1))
-                if index_key >= 4:
-                    self.CLI.invalid_key_index()
-                else:
-                    bytes_data = parts[2]
-                    self.set_key(index_key, bytes_data)
-            elif cmd == "encrypt":
-                if len(parts) != 3:
-                    self.CLI.invalid_encrypt()
-                    return
-                match = re.search(r"key#(\d{2})", parts[1])
-                if not match:
-                    self.CLI.invalid_key_index()
-                    return
-                index_key = int(match.group(1))
-                if index_key >= 4:
-                    self.CLI.invalid_key_index()
-                else:
-                    bytes_data = parts[2]
-                    self.encrypt(index_key, bytes_data)
-            elif cmd == "decrypt":
-                if len(parts) != 3:
-                    self.CLI.invalid_decrypt()
-                    return
-                match = re.fullmatch(r"key#(\d{2})", parts[1])
-                if not match:
-                    self.CLI.invalid_key_index()
-                    return
-                index_key = int(match.group(1))
-                if index_key >= 4:
-                    self.CLI.invalid_key_index()
-                else:
-                    bytes_data = parts[2]
-                    self.decrypt(index_key, bytes_data)
+
+        self.is_socket_connected()
+        cmdhandler = {
+            "define": SetKeyHandler(),
+            "decrypt": DecryptHandler(),
+            "encrypt": EncryptHandler(),
+            "write": WriteHandler(),
+            "read": ReadHandler(),
+        }
+
+        local_commands = {
+            "help": lambda: self.help(),
+            "exit": lambda: self.exit() or False,
+        }
+
+        parts = command.split()
+        cmd = parts[0].lower()  # a gerer dans les expression regulière le lower
+        handler = cmdhandler.get(cmd)
+        if not handler:
+            if cmd in local_commands:
+                result = local_commands[cmd]()
+                return result if result is not None else True
             else:
                 self.CLI.invalid_command()
+        else:
+            handler.execute(self.CLI, self.server_socket, parts)
