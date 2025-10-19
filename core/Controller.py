@@ -105,7 +105,6 @@ class Controller:
             if self.run_server(servername):
                 print("serveur active: ", self.active_servername)
             else:
-                self.CLI.attempt_failed(servername)
                 return False
         else:
             self.is_socket_connected()

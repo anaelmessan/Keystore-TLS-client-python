@@ -19,8 +19,6 @@ DEFAULT_PORT = 6123
 
 
 def transcode_command(command):
-    thread_id = threading.get_ident()
-    print("cmd gérée par ", thread_id, " : ", command)
     plaintext = ""
     match command[0]:
         case 0x00:
@@ -34,15 +32,20 @@ def handle_client(conn, addr):
     controller = Controller(CLIInterfaceAWS(conn), auto=False)
     with conn:
         while True:
-            # conn.send(b"Enter command:\n")
+            thread_id = threading.get_ident()
             command = conn.recv(1024)
+            print(f"Received Bytes: {command}, => thread : {thread_id}")
             if not command:
                 break
-            # value = hex(command[1])[2:]
-            status = controller.run_command(transcode_command(command), str(command[1]))
-            # jsp ça correspond à quoi  ce truc
-            if status is False:
+            try:
+                status = controller.run_command(
+                    transcode_command(command), str(command[1])
+                )
+                if not status:
+                    break
+            except Exception:
                 break
+
     print(f"[-] Connection closed: {addr}")
 
 

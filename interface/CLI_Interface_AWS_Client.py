@@ -56,17 +56,29 @@ class CLIInterfaceAWS(CLIInterface):
         # self.client_socket.send(f"[*] Executing command...\n".encode("utf-8"))
         pass
 
+    def is_hexa(self, data):
+        try:
+            int(data, 16)
+            return True
+        except ValueError:
+            raise ValueError(
+                "The data stored in the record is not a hexadecimal value."
+            )
+
     def command_success(self, response):
         """
         Prints a message indicating a successful command operation.
         """
         try:
-            if response is not "OK":
+            print(response)
+            if self.is_hexa(response):
                 self.client_socket.send(bytes.fromhex("00" + response))
-            else:
-                pass
+        except ValueError as e:
+            print(e)
+            raise
         except Exception as e:
-            print("Le serveur a du être fermé\n", e)
+            print("Unexpected Error: The server probably closed.\n", e)
+            raise
 
     def exit(self):
         """Prints exit messages for the CLI."""
