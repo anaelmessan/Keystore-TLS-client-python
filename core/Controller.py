@@ -4,13 +4,17 @@ from command import *
 
 
 class Controller:
+    """
+    Main controller class for managing CLI interactions and TLS server communication.
+    """
+
     def __init__(self, cli, auto=True):
         self.CLI = cli
         self.active_servername = ""
         self.servernames = ReadConfig.dotenv_read_servernames()
         self.indexvalue = 0
         self.server_socket = ""
-        if auto == True:
+        if auto:
             self.attempt_connect()  # connexion auto
 
     def run_server(self, servername):
@@ -30,6 +34,7 @@ class Controller:
             self.active_servername = servername
             return True
         except Exception:
+            self.CLI.attempt_failed(servername)
             return False
 
     def attempt_connect(self):
@@ -41,7 +46,6 @@ class Controller:
         self.CLI.start_attempt(servername)
         attempt = self.run_server(servername)
         while attempt is False:
-            self.CLI.attempt_failed(servername)
             self.indexvalue += 1
             if self.indexvalue < len(self.servernames):
                 servername = self.servernames[self.indexvalue]
@@ -53,8 +57,11 @@ class Controller:
         self.CLI.success_connect(servername)
 
     def is_socket_connected(self):
+        """
+        Checks if the socket is connected and reconnects if necessary.
+        """
         try:
-            self.server_socket.echo("test")
+            self.server_socket.echo("is_alive")
             data = self.server_socket.receive().decode()
             if data == "":
                 self.server_socket.close_socket()
@@ -64,6 +71,9 @@ class Controller:
             exit()
 
     def help(self):
+        """
+        Displays the CLI help message.
+        """
         self.CLI.help()
 
     def exit(self):
@@ -73,10 +83,14 @@ class Controller:
 
     def run_command(self, command, servername=None):
         """
-        Parse and execute a CLI command by sending the appropriate request to the server.
+        Parse and execute a CLI command.
+
+        Validates the command format, ensures an active TLS connection,
+        and dispatches the request to the appropriate handler or local command.
 
         Args:
             command (str): The command string entered by the user.
+            servername (str, optional): The server to connect.
         Returns:
             bool or None: False if the command is 'exit', otherwise None.
         """

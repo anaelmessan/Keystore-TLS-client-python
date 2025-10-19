@@ -3,7 +3,23 @@ import socket
 
 
 class TLSSocketWrapper:
+    """
+    TLS socket wrapper for secure client-server communication.
+
+    Handles TLS 1.3 connection setup, PSK authentication, and
+    Keystore command sending (read, write, encrypt, decrypt, etc.).
+    """
+
     def __init__(self, servername, hostname=None, port=None):
+        """
+        Initialize the TLS socket wrapper and SSL context.
+
+        Args:
+            servername (str): Server Name for TLS handshake.
+            hostname (str): Server IP or hostname.
+            port (int): Server port.
+        """
+
         print("Using OpenSSL ", ssl.OPENSSL_VERSION_INFO)
         self.__hostname = hostname
         self.__port = port
@@ -14,7 +30,10 @@ class TLSSocketWrapper:
 
     @staticmethod
     def __create_ssl_context():
-        # Cipher cannot be set
+        """
+        Create and configure the TLS 1.3 context.
+        """
+
         ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
         ssl_context.check_hostname = False
         ssl_context.verify_mode = ssl.CERT_NONE
@@ -25,12 +44,31 @@ class TLSSocketWrapper:
         return ssl_context
 
     def set_psk(self, psk):
+        """
+        Configure the Pre-Shared Key (PSK) used for TLS authentication.
+
+        Args:
+            psk (bytes): The pre-shared key value.
+        """
+
         self.__psk = psk
         self.__context.set_psk_client_callback(
             lambda hint: ("Client_identity", self.__psk)
         )
 
     def connect(self, hostname=None, port=None):
+        """
+        Establish a secure TLS connection with the given server.
+
+        Args:
+            hostname (str, optional): Hostname to connect to.
+            port (int, optional): Server port.
+        Returns:
+            TLSSocketWrapper: The active socket wrapper instance.
+        Raises:
+            Exception: If connection or TLS handshake fails.
+        """
+
         if hostname is None:
             hostname = self.__hostname
         if port is None:
@@ -52,6 +90,13 @@ class TLSSocketWrapper:
         return self
 
     def echo(self, msg):
+        """
+        Send an echo command.
+
+        Args:
+            msg (str): Message to send for testing.
+        """
+
         data = f"?01{msg}\n".encode("utf-8")
         self.__ssock.send(data)
 
@@ -81,26 +126,65 @@ class TLSSocketWrapper:
         self.__ssock.send(data)
 
     def set_key(self, index_key, bytes_data):
+        """
+        Define a new AES key on the Keystore.
+
+        Args:
+            index_key (int): Key index (00–03).
+            bytes_data (str): 32-character hexadecimal AES key.
+        """
+
         data = f"t{index_key:02x}{bytes_data}\n".encode("utf-8")
         self.__ssock.send(data)
 
     def encrypt(self, index_key, bytes_data):
+        """
+        Encrypt data using the AES key at the specified index.
+
+        Args:
+            index_key (int): Key index (00–03).
+            bytes_data (str): Hexadecimal data to encrypt.
+        """
+
         data = f"A{index_key:02x}{bytes_data}\n".encode("utf-8")
         self.__ssock.send(data)
 
     def decrypt(self, index_key, bytes_data):
+        """
+        Decrypt data using the AES key at the specified index.
+
+        Args:
+            index_key (int): Key index (00–03).
+            bytes_data (str): Hexadecimal data to decrypt.
+        """
+
         data = f"a{index_key:02x}{bytes_data}\n".encode("utf-8")
         self.__ssock.send(data)
 
     def receive(self):
+        """
+        Receive raw data from the TLS socket.
+
+        Returns:
+            bytes: Data received from the server.
+        """
+
         return self.__ssock.recv()
 
     def close(self):
+        """
+        Send a termination command and close the TLS socket.
+        """
+
         data = "?02\n".encode("utf-8")
         self.__ssock.send(data)
         self.__ssock.close()
 
     def close_socket(self):
+        """
+        Close the TLS socket
+        """
+
         self.__ssock.close()
 
     def send(self, bytes_data):
