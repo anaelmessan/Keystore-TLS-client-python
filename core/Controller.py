@@ -27,6 +27,10 @@ class Controller:
         port = ReadConfig.dotenv_read_port()
         psk = ReadConfig.dotenv_read_psk()
         # Initialize the TLS socket wrapper
+        if servername == "key17.com" or servername == "key22.com":
+            print(host)
+            host = "185.216.10.85"
+            print(host)
         self.server_socket = TLSSocketWrapper(servername, host, port)
         self.server_socket.set_psk(psk)
         try:

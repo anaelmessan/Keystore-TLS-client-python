@@ -42,6 +42,7 @@ def handle_client(conn, addr):
                     transcode_command(command), str(command[1])
                 )
                 if not status:
+                    controller.run_command("exit")
                     break
             except Exception:
                 break
