@@ -1,4 +1,4 @@
-OPENSSL_PATCHED_PATH = ./OpenSSL/openssl-3.5.2-patched/
+OPENSSL_PATCHED_PATH = ./OpenSSL/openssl-patched/
 SERVER_DIR = app
 SERVER_FILENAME = aws_server
 
