@@ -24,7 +24,7 @@ def handle_client(conn, addr):
             try:
                 request = Request(conn,buffer)
                 ConnectionWorker.dispatch_request(request)
-                print(f"Received Bytes: {request}, => thread : {thread_id}")
+                print(f"Encryption client request for: {request.get_keystore()}, => handled by thread : {thread_id}")
 
 
             except Exception as e:
