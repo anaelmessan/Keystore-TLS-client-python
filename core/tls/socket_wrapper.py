@@ -111,6 +111,24 @@ class TLSSocketWrapper:
 
         return self
 
+    @staticmethod
+    def __check_payload_length(data: bytes | bytearray):
+        if (len(data) == 0):
+            raise ValueError("Empty payload.")
+        elif (len(data) > 16*16):
+            raise ValueError("Payload length exeeds 16 blocks.")
+        elif (len(data)%16 != 0):
+            raise ValueError("Payload unpadded.")
+
+    @staticmethod
+    def __check_key_index(key_index: int):
+        if (key_index < 0) or (key_index > 3):
+            raise ValueError("Incorrect key index.")
+
+    def __check_record_index(record_index: int):
+        if (record_index < 0) or (record_index > 31):
+            raise ValueError("Incorrect record index.")
+
     # def ensure_connected(self):
     #     """
     #     Ensure the socket stays connected. Use this before performing an action on the socket, possibly between 2 commands.
@@ -128,7 +146,7 @@ class TLSSocketWrapper:
 
 ########## METHODS TO USE THE SOCKET ################
 
-    def echo(self, msg):
+    def echo(self, msg: str):
         """
         Send an echo command.
 
@@ -136,39 +154,45 @@ class TLSSocketWrapper:
             msg (str): Message to send for testing.
         """
 
-        data = f"?01{msg}\n"
-        if not self.send_command(data).startswith(msg):
+        data = f"?01{msg}\n".encode("utf-8")
+        if not self.send_command(data).decode().startswith(msg):
             raise CommandUnexpectedResponse("Echo failed")
 
 
-    def read_record(self, record_number):
+    def read_record(self, record_number: int) -> bytes:
         """
-        Reads the string stored at the specified record number.
-        Sends a read command to the server for the given record number.
+        Reads the string stored at the specified record number on the remote server.
+
         Args:
             record_number (int): The record number to read from.
 
         Returns:
-            str: The data contained in the record.
+            bytes: The data contained in the record.
+
+        Notes:
+            Reading "ERROR" will raise an exception.
         """
-        data = f"I{record_number:02x}\n"
+
+        TLSSocketWrapper.__check_record_index(record_number)
+        data = f"I{record_number:02x}\n".encode('utf-8')
         response = self.send_command(data)
-        if response.startswith('ERROR'):
+        if response.startswith(b'ERROR'):
             raise CommandErrorResponse(f"Read record n°{record_number:02x} failed")
         return response
 
-    def write_record(self, record_number, text_data):
+    def write_record(self, record_number: int, data : bytes | bytearray):
         """
-        Writes a bit string to the specified record number (location 00 of key17).
-        This method reconnects to the server for each command due to server timeout constraints.
-        Sends a write command to the server with the given record number and bit string.
+        Writes bytes to the specified record number on the remote server.
 
         Args:
             record_number (int): The record number to write to.
-            text_data (str): The string to write.
+            data (bytes-like object): The bytes to write.
         """
-        data = f"Z{record_number:02x}{text_data}\n"
-        response = self.send_command(data)
+
+        TLSSocketWrapper.__check_record_index(record_number)
+
+        command_data = f"Z{record_number:02x}".encode('utf-8') + data + "\n".encode('utf-8')
+        response = self.send_command(command_data).decode()
         if not response.startswith('OK'):
             if response.startswith('ERROR'):
                 raise CommandErrorResponse(f"Write record n°{record_number:02x} failed")
@@ -176,92 +200,99 @@ class TLSSocketWrapper:
                 raise CommandUnexpectedResponse(f"Unexpected response from server: {response}")
 
 
-    def set_AES_key(self, index_key, text_data):
+    def set_AES_key(self, index_key: int, key: bytes | bytearray):
         """
         Define a new AES key on the Keystore.
 
         Args:
             index_key (int): Key index (00–03).
-            bytes_data (str): 32-character hexadecimal AES key.
+            key (bytes | bytearray): 16 bytes AES key.
         """
 
-        data = f"t{index_key:02x}{text_data}\n"
-        response = self.send_command(data)
+        TLSSocketWrapper.__check_key_index(index_key)
+        text_key = key.hex()
+        data = f"t{index_key:02x}{text_key}\n".encode('utf-8')
+        response = self.send_command(data).decode()
         if not response.startswith('OK'):
             if response.startswith('ERROR'):
                 raise CommandErrorResponse(f"Set key n°{index_key:02x} failed")
             else:
                 raise CommandUnexpectedResponse(f"Unexpected response from server: {response}")
 
-    def encrypt_AES(self, index_key, text_data):
+    def encrypt_AES(self, index_key: int, data: bytes | bytearray) -> bytes:
         """
         Encrypt data using the AES key at the specified index.
 
         Args:
-            index_key (int): Key index (00–03).
-            text_data (str): Hexadecimal data to encrypt.
+            index_key (int): Key index (0–3).
+            data (bytes | bytearray): Data to encrypt, 1 to 16 blocks of 16 bytes.
         """
 
-        data = f"A{index_key:02x}{text_data}\n"
-        response = self.send_command(data)
+        TLSSocketWrapper.__check_payload_length(data)
+        TLSSocketWrapper.__check_key_index(index_key)
+
+        text_data = data.hex()
+        text_command = f"A4{index_key:x}{text_data}\n".encode('utf-8')
+        response = self.send_command(text_command).decode() #We decode text encoded hex.
         if response.startswith('ERROR'):
-            raise CommandErrorResponse(f"Encrypting using AES key n°{index_key:02x} failed")
-        return response
+            raise CommandErrorResponse(f"Encrypting using AES key n°{index_key:x} failed")
+        return bytes.fromhex(response) #We encode hex text to python bytes.
 
-    def encrypt_AES_binary(self, index_key, bytes_data):
-        """
-        Encrypt data using the AES key at the specified index.
-
-        Args:
-            index_key (int): Key index (00–03).
-            bytes_data (bytes-like object): Hexadecimal data to encrypt.
-        """
-
-        if (len(bytes_data)%16 != 0) or (len(bytes_data) == 0):
-            raise ValueError("Invalid length: " + str(len(bytes_data)))
-
-        data = f"?D{index_key:1X}".encode("utf-8") + bytes_data + "\n".encode("utf-8")
-        try:
-            response = self.send_command(data)
-        except TLSConnectionClosed as e:
-            raise CommandErrorResponse("Encryption failed.")
-        return response
-
-    def decrypt_AES_binary(self, index_key, bytes_data):
-        """
-        Encrypt data using the AES key at the specified index.
-
-        Args:
-            index_key (int): Key index (00–03).
-            bytes_data (bytes-like object): Hexadecimal data to encrypt.
-        """
-
-        if (len(bytes_data)%16 != 0) or (len(bytes_data) == 0):
-            raise ValueError("Invalid length: " + str(len(bytes_data)))
-
-        data = f"?D{index_key+8:1X}".encode("utf-8") + bytes_data + "\n".encode("utf-8")
-        try:
-            response = self.send_command(data)
-        except TLSConnectionClosed as e:
-            raise CommandErrorResponse("Decryption failed.")
-        return response
-
-
-
-
-    def decrypt_AES(self, index_key, text_data):
+    def decrypt_AES(self, index_key: int, data: bytes | bytearray) -> bytes:
         """
         Decrypt data using the AES key at the specified index.
 
         Args:
-            index_key (int): Key index (00–03).
-            bytes_data (str): Hexadecimal data to decrypt.
+            index_key (int): Key index (0–3).
+            data (bytes | bytearray): Data to decrypt, 1 to 16 blocks of 16 bytes.
         """
 
-        data = f"a{index_key:02x}{text_data}\n"
-        response = self.send_command(data)
+        TLSSocketWrapper.__check_payload_length(data)
+        TLSSocketWrapper.__check_key_index(index_key)
+
+        text_data = data.hex()
+        text_command = f"a4{index_key:x}{text_data}\n".encode('utf-8')
+        response = self.send_command(text_command).decode()
         if response.startswith('ERROR'):
-            raise CommandErrorResponse(f"Decrypting using AES key n°{index_key:02x} failed")
+            raise CommandErrorResponse(f"Decrypting using AES key n°{index_key:x} failed")
+        return bytes.fromhex(response)
+
+    def encrypt_AES_binary(self, index_key: int, data: bytes | bytearray) -> bytes:
+        """
+        Encrypt data using the AES key at the specified index.
+
+        Args:
+            index_key (int): Key index (0–3).
+            data (bytes-like object): Data to encrypt.
+        """
+
+        TLSSocketWrapper.__check_payload_length(data)
+        TLSSocketWrapper.__check_key_index(index_key)
+
+        command_data = f"Ac{index_key:1X}".encode("utf-8") + data + "\n".encode("utf-8")
+        try:
+            response = self.send_command(command_data)
+        except TLSConnectionClosed as e:
+            raise CommandErrorResponse("Encryption failed.")
+        return response
+
+    def decrypt_AES_binary(self, index_key: int, data: bytes | bytearray) -> bytes:
+        """
+        Decrypt data using the AES key at the specified index.
+
+        Args:
+            index_key (int): Key index (0–3).
+            data (bytes-like object): Data to decrypt.
+        """
+
+        TLSSocketWrapper.__check_payload_length(data)
+        TLSSocketWrapper.__check_key_index(index_key)
+
+        command_data = f"ac{index_key:1X}".encode("utf-8") + data + "\n".encode("utf-8")
+        try:
+            response = self.send_command(command_data)
+        except TLSConnectionClosed as e:
+            raise CommandErrorResponse("Decryption failed.")
         return response
 
     def close(self):
@@ -301,50 +332,37 @@ class TLSSocketWrapper:
             raise TLSConnectionClosed("Server closed connection (EOF).")
         return data
 
-    def send_command(self,data):
+    def send_command(self,data: bytes | bytearray) -> bytes:
         """
         Send raw data from the TLS socket.
 
+        Arguments:
+            data (bytes-like object): Command to send.
         Returns:
-            bytes or str: Data received from the server.
+            bytes: Data received from the server.
         Raises:
             TLSConnectionClosed: if the server closed the connection and auto-reconnect is disabled.
             TLSReconnectFailed: if reconnection or resend fails.
         """
 
-        if isinstance(data, str):
-            bytes_data = data.encode('utf-8')
-            decode_output = True
-
-        elif isinstance(data, (bytes, bytearray)):
-            bytes_data = data
-            decode_output = False
-        else:
-            raise TypeError("Wrong type")
-
         #TODO add a try block to ensure connection (no close socket in the except)
-        self.__ssock.send(bytes_data)
+        self.__ssock.send(data)
         try:
             response = self.receive_command_bytes()
-
         except TLSConnectionClosed:
             if self.__ensure_connected_before_send:
                 print("Info: reconnecting before sending data")
                 try:
                     self._close_socket()
                     self.connect()
-                    self.__ssock.send(bytes_data)
+                    self.__ssock.send(data)
                     response = self.receive_command_bytes()
                 except Exception as e:
                     raise TLSReconnectFailed(f"Reconnection to {self.__servername} failed: {e}") from e
                 #print("Warning: auto reconnecting the socket upon server timeout which is monopolizing resources")
             else:
                 raise TLSConnectionClosed("Server closed the connection (auto-reconnect disabled).")
-
-        if decode_output:
-            return response.decode()
-        else:
-            return response
+        return response
 
     def __str__(self):
         return self.__hostname + str(self.__port) + str(self.__servername) + str(self.__context) + str(self.__ssock) + str(self.__psk)

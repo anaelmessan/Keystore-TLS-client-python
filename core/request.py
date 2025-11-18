@@ -51,7 +51,13 @@ class Request:
         Raises:
             Exceptions from TLSSocketWrapper.
         """
-        self.__response = self.__SocketWrapperMethodCaller(socketWrapper)
+        try:
+            self.__response = b"00" + self.__SocketWrapperMethodCaller(socketWrapper)
+        except Exception as e:
+            # Error codes
+            print(e)
+            self.__response = b"01"
+
 
     def send_response(self):
         """
@@ -89,15 +95,29 @@ class Request:
         # The cmd_id defines the format of the request
         # Here is the byte syntax of the clients' requests
         dispatch = {
-            #Read record
+            # Read record
             0 : lambda: methodcaller("read_record",self.__raw_request[2]),
                 #[byte 0: 0x00 (cmd_id 0)]
                 #[byte 1: keyx.com]
                 #[byte 2: record number]
 
-            #Generate Ck from k
-            1 : lambda: methodcaller("other request not implemented yet"),
+            # Encrypt AES (binary)
+            1 : lambda: methodcaller("encrypt_AES_binary", self.__raw_request[2], self.__raw_request[3:]),
                 #[byte 0: 0x01 (cmd_id 1)]
+                #[byte 1: keyx.com]
+                #[byte 2: key slot number]
+                #[bytes 3-: data blocks (up to 16 blocks)]
+
+            # Decrypt AES (binary)
+            2 : lambda: methodcaller("decrypt_AES_binary", self.__raw_request[2], self.__raw_request[3:]),
+                #[byte 0: 0x02 (cmd_id 2)]
+                #[byte 1: keyx.com]
+                #[byte 2: key slot number]
+                #[bytes 3-: data blocks (up to 16 blocks)]
+
+            #Generate Ck from k
+            9 : lambda: methodcaller("other request not implemented yet"),
+                #[byte 0: 0x09 (cmd_id 9)]
                 #[byte 1: keyx.com]
                 #[byte 0x02: key slot number]
                 #[bytes 3-34: key k (256 bits)]

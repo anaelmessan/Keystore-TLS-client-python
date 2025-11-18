@@ -26,7 +26,7 @@ def worker(name: str, payload: bytes):
 def main():
     # exemples de payloads (octets)
     payload1 = b"\x00\x11\x01"
-    payload2 = b"\x00\x16\x01"
+    payload2 = b"\x02\x16\x01" + bytes.fromhex("b6f8dec40428caf40a2dbc2721ad5008eec764fa2b0dde6b61cdc75390c67e28")
 
     t1 = threading.Thread(target=worker, args=("conn1", payload1))
     t2 = threading.Thread(target=worker, args=("conn2", payload2))

@@ -19,7 +19,6 @@ class ConnectionWorker:
     def __init__(self, hostname, port, servername, psk = None, ensure_connected_before_send = True):
         self.servername = servername #ID
 
-        # Privte
         self.__socketWrapper = TLSSocketWrapper(hostname, port, servername, psk, ensure_connected_before_send)
         self.__request_queue = queue.Queue()
         self.__worker_thread = None
