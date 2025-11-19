@@ -319,10 +319,8 @@ class TLSSocketWrapper:
             raise CommandErrorResponse("Decryption failed.")
         return response
 
-    def generate_ck(self, index_key: int, key: bytes | bytearray) -> str:
-        print("key : ", key.hex())
+    def generate_ck(self, index_key: int, key: bytes | bytearray) -> bytes:
         r = os.urandom(16)
-        print("r : ", r.hex())
         r1 = int.from_bytes(r, byteorder="big") + 1
         r1 = r1.to_bytes(16, byteorder="big")
         r2 = int.from_bytes(r, byteorder="big") + 2
@@ -335,15 +333,11 @@ class TLSSocketWrapper:
         c1 = TLSSocketWrapper.__xor_bytes(eval1, k1)
         c2 = TLSSocketWrapper.__xor_bytes(eval2, k2)
         ck = b"".join((r, c1, c2))
-        print("ck : ", ck.hex())
         return ck
 
     def get_File_Key(self, index_key: int, ck: bytes | bytearray) -> bytes:
         r = ck[:16]
         thread_id = threading.get_ident()
-        print(f"[{thread_id}] r from ck : {r.hex()}")
-        print(f"[{thread_id}] c1 from ck : {ck[16:32].hex()}")
-        print(f"[{thread_id}] c2 from ck : {ck[32:].hex()}")
 
         r1 = int.from_bytes(r, byteorder="big") + 1  # Convertit r en entier
         r1 = r1.to_bytes(16, byteorder="big")  # Reconvertit en bytes (16 octets)
@@ -352,13 +346,10 @@ class TLSSocketWrapper:
 
         eval1 = self.encrypt_AES_binary(index_key, r1)
         eval2 = self.encrypt_AES_binary(index_key, r2)
-        print(f"[{thread_id}] eval1 from ck : {eval1.hex()}")
-        print(f"[{thread_id}] eval2 from ck : {eval2.hex()}")
 
         k1 = TLSSocketWrapper.__xor_bytes(ck[16:32], eval1)
         k2 = TLSSocketWrapper.__xor_bytes(ck[32:], eval2)
         k = k1 + k2
-        print(f"[{thread_id}] k from ck : {k.hex()}")
 
         return k
 
