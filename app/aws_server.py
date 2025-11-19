@@ -1,9 +1,9 @@
-import core.tls.socket_wrapper
 import socket
 from core.tools.read_config import readconfig
 import threading
 from core.tls.hsm_connection import ConnectionWorker
 from core.request import Request
+import sys
 
 HOST = "0.0.0.0"  # Listen on all interfaces
 DEFAULT_PORT = 6123
@@ -11,7 +11,6 @@ DEFAULT_PORT = 6123
 
 def handle_client(conn, addr):
     print(f"[+] New connection from {addr}")
-
 
     with conn:
         while True:
@@ -22,15 +21,14 @@ def handle_client(conn, addr):
                 break
 
             try:
-                request = Request(conn,buffer)
+                request = Request(conn, buffer)
                 ConnectionWorker.dispatch_request(request)
-                print(f"Encryption client request for: {request.get_keystore()}, => handled by thread : {thread_id}")
-
+                print(
+                    f"Encryption client request for: {request.get_keystore()}, => handled by thread : {thread_id}"
+                )
 
             except Exception as e:
                 print(e)
-
-
 
             #     status = controller.run_request(
             #         transcode_request(request, sock)
@@ -48,10 +46,9 @@ def main():
     keystores = readconfig("config.yaml")
 
     for keystore_infos in keystores:
-            ConnectionWorker(*keystore_infos)
+        ConnectionWorker(*keystore_infos)
 
     ConnectionWorker.start_all()
-
 
     try:
         port = int(sys.argv[1])
@@ -67,7 +64,13 @@ def main():
         while True:
             conn, addr = s.accept()
             # Start a new thread for each client
-            thread = threading.Thread(target=handle_client, args=(conn, addr, ))
+            thread = threading.Thread(
+                target=handle_client,
+                args=(
+                    conn,
+                    addr,
+                ),
+            )
             thread.daemon = True  # So threads close when main program ends
             thread.start()
 
