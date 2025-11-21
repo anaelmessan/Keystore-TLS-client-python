@@ -1,7 +1,7 @@
 from operator import methodcaller
 from core.request.interface import BaseRequest
 
-class RemoteRequest:
+class RemoteRequest(BaseRequest):
     """
     A class that represents a request with its response and origin.
 
