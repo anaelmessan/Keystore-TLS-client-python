@@ -1,6 +1,7 @@
 from operator import methodcaller
+from core.request.interface import BaseRequest
 
-class Request:
+class RemoteRequest:
     """
     A class that represents a request with its response and origin.
 
@@ -28,19 +29,19 @@ class Request:
         """
         return self.__keystore
 
-    def request_then_transmit(self, socketWrapper):
+    def process_request(self, socketWrapper):
         """
         Send the request, retrieve the response then transmits it.
 
         Args:
             socketWrapper (TLSSocketWrapper): TLSSocketWrapper instance.
         """
-        self.runSocketWrapperMethod(socketWrapper)
+        self.__runSocketWrapperMethod(socketWrapper)
         self.send_response()
 
 
 
-    def runSocketWrapperMethod(self, socketWrapper):
+    def __runSocketWrapperMethod(self, socketWrapper):
         """
         Execute the method of a TLSSocketWrapper stored in self.__SocketWrapperMethodCaller.
         Stores the response.
@@ -129,8 +130,4 @@ class Request:
 
         self.__SocketWrapperMethodCaller = dispatch[cmd_id]()
         self.__keystore = f"key{self.__raw_request[1]}.com"
-
-    def set_response(self, response):
-        # Set the response (unused)
-        self.__response = response
 

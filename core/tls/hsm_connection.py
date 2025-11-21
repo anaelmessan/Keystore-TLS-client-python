@@ -52,7 +52,7 @@ class ConnectionWorker:
             except queue.Empty:
                 continue
 
-            cmd.request_then_transmit(self.__socketWrapper)
+            cmd.process_request(self.__socketWrapper)
 #            except Exception as e:
 #                print(e)
 #                print("debug", e)

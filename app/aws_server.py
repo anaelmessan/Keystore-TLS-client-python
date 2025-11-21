@@ -3,7 +3,7 @@ import socket
 from core.tools.read_config import readconfig
 import threading
 from core.tls.hsm_connection import ConnectionWorker
-from core.request import Request
+from core.request.remote import RemoteRequest
 
 HOST = "0.0.0.0"  # Listen on all interfaces
 DEFAULT_PORT = 6123
@@ -22,24 +22,13 @@ def handle_client(conn, addr):
                 break
 
             try:
-                request = Request(conn,buffer)
+                request = RemoteRequest(conn,buffer)
                 ConnectionWorker.dispatch_request(request)
                 print(f"Encryption client request for: {request.get_keystore()}, => handled by thread : {thread_id}")
 
 
             except Exception as e:
                 print(e)
-
-
-
-            #     status = controller.run_request(
-            #         transcode_request(request, sock)
-            #     )
-            #     if not status:
-            #         controller.run_request("exit")
-            #         break
-            # except Exception:
-            #     break
 
     print(f"[-] Connection closed: {addr}")
 
