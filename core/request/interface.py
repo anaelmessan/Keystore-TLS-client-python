@@ -6,10 +6,6 @@ class BaseRequest(ABC):
 
     Depends on:
         TLSSocketWrapper: name of the methods to use.
-
-    Notes:
-        Just use get_keystore() and request_then_transmit(socketWrapper).
-        Close the thread and socket on exceptions.
     """
 
     @abstractmethod
@@ -23,7 +19,7 @@ class BaseRequest(ABC):
         ...
 
     @abstractmethod
-    def process_request(self, socketWrapper) -> bytes:
+    def process_request(self, socketWrapper):
         """
         Send the request.
         It can : store the response, signal the response is ready, or send the response.
