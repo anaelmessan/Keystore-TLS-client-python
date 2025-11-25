@@ -16,7 +16,7 @@ run_azure:
 	LD_LIBRARY_PATH=$(OPENSSL_PATCHED_PATH) $(PYTHON_ENV_BINARY) -m $(APP_DIR).$(AZURE_CLIENT)
 
 # (Optional) Set up the venv, if not using system-wide python packages.
-install_deps_venv:
+install_deps:
 	python -m venv $(VENV_DIR_NAME)
 	$(PYTHON_ENV_BINARY) -m pip install -r requirements.txt
 

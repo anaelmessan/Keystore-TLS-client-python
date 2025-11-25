@@ -7,10 +7,18 @@ Clone the repo :
 > git clone https://github.com/anaelmessan/Keystore-TLS-client-python.git  
 
 ### Running
-Run the server (default port : 6123):
-> make run_server <SERV_PORT=_PORT_>  
+Install dependencies (needed for Azure):
+> make install_deps  
 
-Run the stub client:
+If there is an error, ensure that Python venv is installed (_python3-venv_ package on Debian).  
+
+Run the Azure client:  
+> make run_azure
+
+Run the intermediate server for the AWS client (default port : 6123):
+> make run_server_aws <SERV_PORT=_PORT_>  
+
+Run the stub client (for testing the AWS server connectivity):
 > make run_stub  
 
 
