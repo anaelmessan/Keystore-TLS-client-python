@@ -319,7 +319,7 @@ class TLSSocketWrapper:
             raise CommandErrorResponse("Decryption failed.")
         return response
 
-    def generate_ck(self, index_key: int, key: bytes | bytearray) -> bytes:
+    def wrap_cek(self, index_key: int, key: bytes | bytearray) -> bytes:
         r = os.urandom(16)
         r1 = int.from_bytes(r, byteorder="big") + 1
         r1 = r1.to_bytes(16, byteorder="big")
@@ -335,9 +335,8 @@ class TLSSocketWrapper:
         ck = b"".join((r, c1, c2))
         return ck
 
-    def get_File_Key(self, index_key: int, ck: bytes | bytearray) -> bytes:
+    def unwrap_cek(self, index_key: int, ck: bytes | bytearray) -> bytes:
         r = ck[:16]
-        thread_id = threading.get_ident()
 
         r1 = int.from_bytes(r, byteorder="big") + 1  # Convertit r en entier
         r1 = r1.to_bytes(16, byteorder="big")  # Reconvertit en bytes (16 octets)
