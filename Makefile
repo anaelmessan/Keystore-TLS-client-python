@@ -22,4 +22,8 @@ install_deps:
 run_localhost_client:
 	python -m app.templates.client_over_localhost_template
 
-.PHONY: run_intermediate_server run_azure run_localhost_client
+run_monolithic_template:
+	printf "Running the Azure client"
+	LD_LIBRARY_PATH=$(OPENSSL_PATCHED_PATH) $(PYTHON_ENV_BINARY) -m app.templates.monolithic_client_template
+
+.PHONY: run_intermediate_server run_azure run_localhost_client run_monolithic

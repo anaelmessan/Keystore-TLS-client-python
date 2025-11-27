@@ -9,12 +9,13 @@ class LocalRequest(BaseRequest):
     Depends on:
         TLSSocketWrapper: name of the methods to use.
     """
-    def __init__(self, keystore: str, method: tuple[str, ...]):
+    def __init__(self, keystore: str, method: tuple[str, ...], response_queue = None):
         self.__response = None
         self.__keystore = keystore
         self.__SocketWrapperMethodCaller = methodcaller(*method)
         self.__done = threading.Event()
         self.__error = None
+        self.__simultaneous_queue = response_queue
 
     def get_keystore(self):
         """
@@ -35,10 +36,13 @@ class LocalRequest(BaseRequest):
 
         try:
             self.__response = self.__SocketWrapperMethodCaller(socketWrapper)
+            if self.__simultaneous_queue:
+                self.__simultaneous_queue.put(self)
         except Exception as e:
             self.__error = e
         finally:
             self.__done.set()
+
 
     def get_response(self, timeout=None):
         """
