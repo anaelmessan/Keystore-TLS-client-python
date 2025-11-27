@@ -117,7 +117,7 @@ class RemoteRequest(BaseRequest):
             # [bytes 3-: data blocks (up to 16 blocks)]
             # Generate Ck from k
             3: lambda: methodcaller(
-                "generate_ck", self.__raw_request[2], self.__raw_request[3:]
+                "wrap_cek", self.__raw_request[2], self.__raw_request[3:]
             ),
             # [byte 0: 0x01 (cmd_id 1)]
             # [byte 1: keyx.com]
@@ -125,7 +125,7 @@ class RemoteRequest(BaseRequest):
             # [bytes 3-34: key k (256 bits)]
             # Get K from ck
             4: lambda: methodcaller(
-                "get_File_Key", self.__raw_request[2], self.__raw_request[3:]
+                "unwrap_cek", self.__raw_request[2], self.__raw_request[3:]
             ),
             # [byte 0: 0x02 (cmd_id 2)]
             # [byte 1: keyx.com]
