@@ -4,6 +4,7 @@ SERVER_FILENAME = aws_server
 AZURE_CLIENT = azure_client
 VENV_DIR_NAME = ".venv"
 PYTHON_ENV_BINARY = .venv/bin/python3 # If the required libraries are installed in a .venv, put the .venv python path. If it is system-wide, just put "python3".
+GUI_NAME = gui
 
 # Amazon server:
 run_server_aws:
@@ -14,6 +15,9 @@ run_server_aws:
 run_azure:
 	printf "Running the Azure client"
 	LD_LIBRARY_PATH=$(OPENSSL_PATCHED_PATH) $(PYTHON_ENV_BINARY) -m $(APP_DIR).$(AZURE_CLIENT)
+
+run_gui:
+	LD_LIBRARY_PATH=$(OPENSSL_PATCHED_PATH) $(PYTHON_ENV_BINARY) -m $(APP_DIR).$(GUI_NAME)
 
 # (Optional) Set up the venv, if not using system-wide python packages.
 install_deps:

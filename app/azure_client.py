@@ -10,7 +10,7 @@ def main():
     keystores = readconfig("config.yaml")
 
     for keystore_infos in keystores:
-            ConnectionWorker(*keystore_infos)
+        ConnectionWorker(*keystore_infos)
 
     ConnectionWorker.start_all()
 
