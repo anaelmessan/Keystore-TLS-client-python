@@ -93,7 +93,7 @@ class AppWindow:
         # Check if this item has children
         children = self.tree.get_children(item_id)
         if children:
-            #print("This action only applies to files (leaf nodes).")
+            print("This action only applies to a file.")
             return
 
         (container, filename) = self.tree.item(item_id, "values")
@@ -107,9 +107,6 @@ class AppWindow:
         title="Save blob as..."
     )
         print("Downloading:", container, filename)
-
-        # TODO ADD PROMPT for local filename or handle increment file name in cloud_provider.download()
-
         try:
             self.cloud_handler.download(path, container, filename)
         except Exception as e:
@@ -118,7 +115,6 @@ class AppWindow:
 
 
     def on_ul_button_click(self):
-
         sel = self.tree.selection()
         if not sel:
             print("No bucket selected.")
@@ -151,7 +147,13 @@ class AppWindow:
 
 
     def on_bucket_button_click(self):
-        #self.cloud_handler.create_bucket(name)
+        name = simpledialog.askstring(
+                "Bucket name",
+                "Enter the name of the bucket to create:"
+            )
+        if not name:
+                return
+        self.cloud_handler.create_container(name)
         pass
 
     def on_connect_hsm_button_click(self):
