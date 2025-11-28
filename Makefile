@@ -12,6 +12,10 @@ run_azure:
 	printf "Running the Azure client"
 	LD_LIBRARY_PATH=$(OPENSSL_PATCHED_PATH) $(PYTHON_ENV_BINARY) -m app.azure.gui
 
+run_google:
+	printf "Running the Google Storage client"
+	LD_LIBRARY_PATH=$(OPENSSL_PATCHED_PATH) $(PYTHON_ENV_BINARY) -m app.google.gui
+
 # (Optional) Set up the venv, if not using system-wide python packages.
 install_deps:
 	python -m venv $(VENV_DIR_NAME)

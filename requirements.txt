@@ -1,2 +1,4 @@
 azure-storage-blob
 pyyaml
+google-cloud-storage
+tink
