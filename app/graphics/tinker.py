@@ -69,7 +69,10 @@ class AppWindow:
             print(e)
         else:
             # Upper left
+            # Title
+
             self.tree = ttk.Treeview(self.upper_left)
+            self.tree.heading("#0", text=self.cloud_handler.get_service_name())
             self.tree.pack(fill="both", expand=True)
 
             if self.cloud_handler.connected:

@@ -2,12 +2,13 @@ from azure.storage.blob import BlobServiceClient, ContainerClient
 from azure.core.exceptions import ResourceExistsError, HttpResponseError
 
 
-class AzureCloudHandler:
+class AzuriteCloudHandler:
     """
     Class to handle requests to the cloud.
     To keep compatibility, implement the public methods.
     """
     def __init__(self, key_provider):
+        self.__service_name = "Azurite"
         self.__connection_string = ("DefaultEndpointsProtocol=http;"
     "AccountName=devstoreaccount1;"
     "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;"
@@ -84,6 +85,9 @@ class AzureCloudHandler:
             self.blob_service_client.create_container(name=container_name)
         except ResourceExistsError:
             print('A container with this name already exists.')
+
+    def get_service_name(self):
+        return self.__service_name
 
 
     def __init_encryption_blob(self, container_name, filename):
