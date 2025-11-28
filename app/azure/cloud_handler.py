@@ -80,7 +80,10 @@ class AzureCloudHandler:
         Argument:
             container_name (str): the name of the container (or bucket) to create.
         """
-        pass
+        try:
+            self.blob_service_client.create_container(name=container_name)
+        except ResourceExistsError:
+            print('A container with this name already exists.')
 
 
     def __init_encryption_blob(self, container_name, filename):

@@ -154,7 +154,7 @@ class AppWindow:
         if not name:
                 return
         self.cloud_handler.create_container(name)
-        pass
+        self.refresh_tree()
 
     def on_connect_hsm_button_click(self):
         self.cloud_handler.connect_hsm()
