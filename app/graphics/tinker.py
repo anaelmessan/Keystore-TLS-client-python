@@ -64,7 +64,8 @@ class AppWindow:
 
 
         try:
-            self.cloud_handler.connect_cloud()
+            if not self.cloud_handler.connected:
+                self.cloud_handler.connect_cloud()
         except Exception as e:
             print(e)
         else:
