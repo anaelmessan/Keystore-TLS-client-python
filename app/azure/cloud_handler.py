@@ -42,7 +42,7 @@ class AzureCloudHandler:
         """
         try:
             with open(self.credentials_path, "r") as file:
-                connection_string = file.read()
+                connection_string = file.read().strip()
         except Exception:
             print("Could not read Azure credentials. Using Azurite credentials.")
             connection_string = ("DefaultEndpointsProtocol=http;"
