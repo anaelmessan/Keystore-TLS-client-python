@@ -2,22 +2,18 @@ from azure.storage.blob import BlobServiceClient, ContainerClient
 from azure.core.exceptions import ResourceExistsError, HttpResponseError
 
 
-class AzuriteCloudHandler:
+class AzureCloudHandler:
     """
     Class to handle requests to the cloud.
     To keep compatibility, implement the public methods.
     """
-    def __init__(self, key_provider):
-        self.__service_name = "Azurite"
-        self.__connection_string = ("DefaultEndpointsProtocol=http;"
-    "AccountName=devstoreaccount1;"
-    "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;"
-    "BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;"
-    "QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;"
-    "TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;")
+    def __init__(self, key_provider, credentials_path = None):
+        self.__service_name = "Azure"
+
         self.blob_service_client = None
         self.connected = False
         self.key_provider = key_provider
+        self.credentials_path = credentials_path
 
     def get_list_containers(self) -> list[str]:
         """
@@ -26,7 +22,6 @@ class AzuriteCloudHandler:
         """
         # TODO error handling
         return list(self.blob_service_client.list_containers())
-
     def get_list_files(self, container_name: str) -> list[str]:
         """
         Returns:
@@ -45,7 +40,19 @@ class AzuriteCloudHandler:
         """
         Connects to the cloud (if needed).
         """
-        self.blob_service_client = BlobServiceClient.from_connection_string(self.__connection_string)
+        try:
+            with open(self.credentials_path, "r") as file:
+                connection_string = file.read()
+        except Exception:
+            print("Could not read Azure credentials. Using Azurite credentials.")
+            connection_string = ("DefaultEndpointsProtocol=http;"
+            "AccountName=devstoreaccount1;"
+            "AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;"
+            "BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;"
+            "QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;"
+            "TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;")
+
+        self.blob_service_client = BlobServiceClient.from_connection_string(connection_string)
         self.connected = True
         print("Connected")
 
