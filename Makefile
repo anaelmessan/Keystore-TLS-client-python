@@ -12,6 +12,10 @@ run_azure:
 	printf "Running the Azure client"
 	LD_LIBRARY_PATH=$(OPENSSL_PATCHED_PATH) $(PYTHON_ENV_BINARY) -m app.azure.gui
 
+run_amazon:
+	printf "Running the Amazon S3 client"
+	LD_LIBRARY_PATH=$(OPENSSL_PATCHED_PATH) $(PYTHON_ENV_BINARY) -m app.amazon_s3.gui
+
 run_google:
 	printf "Running the Google Storage client"
 	LD_LIBRARY_PATH=$(OPENSSL_PATCHED_PATH) $(PYTHON_ENV_BINARY) -m app.google.gui
@@ -30,4 +34,4 @@ run_monolithic_template:
 	printf "Running the Azure client"
 	LD_LIBRARY_PATH=$(OPENSSL_PATCHED_PATH) $(PYTHON_ENV_BINARY) -m app.templates.monolithic_client_template
 
-.PHONY: run_intermediate_server run_azure run_localhost_client run_monolithic
+.PHONY: run_intermediate_server run_azure run_google run_amazon run_localhost_client run_monolithic
