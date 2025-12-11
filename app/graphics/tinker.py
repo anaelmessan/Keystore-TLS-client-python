@@ -169,12 +169,11 @@ class AppWindow:
             self.tree.delete(item)
 
         containers = self.cloud_handler.get_list_containers()
-        for container in containers:
-            container_name = container.name
+        for container_name in containers:
             container_node = self.tree.insert("", "end", text = container_name, open=False, values=(container_name, ""))
 
             for file in self.cloud_handler.get_list_files(container_name):
-                self.tree.insert(container_node, "end", text=file.name, values=(container_name, file.name))
+                self.tree.insert(container_node, "end", text=file, values=(container_name, file))
 
     def run(self):
         self.root.mainloop()

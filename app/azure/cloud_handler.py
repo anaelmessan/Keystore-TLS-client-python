@@ -21,14 +21,15 @@ class AzureCloudHandler:
             list[string]: the list of the names of containers (or buckets).
         """
         # TODO error handling
-        return list(self.blob_service_client.list_containers())
+        return [container.name for container in self.blob_service_client.list_containers()]
+
     def get_list_files(self, container_name: str) -> list[str]:
         """
         Returns:
             list[string]: the list of the names of files (or blobs) inside a container.
         """
         container = self.blob_service_client.get_container_client(container_name)
-        return list(container.list_blobs())
+        return [file.name for file in container.list_blobs()]
 
     def connect_hsm(self):
         """

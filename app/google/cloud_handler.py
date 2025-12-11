@@ -45,11 +45,11 @@ class GoogleCloudHandler:
         return self.__service_name
 
     def get_list_containers(self):
-        return list(self.client.list_buckets())
+        return [bucket.name for bucket in self.client.list_buckets()]
 
     def get_list_files(self, container_name: str):
         bucket = self.client.bucket(container_name)
-        return list(bucket.list_blobs())
+        return [file.name for file in bucket.list_blobs()]
 
     def connect_hsm(self):
         self.key_provider.connect()
