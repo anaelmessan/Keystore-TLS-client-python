@@ -1,6 +1,7 @@
 from operator import methodcaller
 from core.request.interface import BaseRequest
 import threading
+import time
 
 class LocalRequest(BaseRequest):
     """
@@ -44,7 +45,7 @@ class LocalRequest(BaseRequest):
             self.__done.set()
 
 
-    def get_response(self, timeout=None):
+    def get_response(self, timeout=3):
         """
         Returns the response of the client (blocking).
 
@@ -58,7 +59,9 @@ class LocalRequest(BaseRequest):
             Exceptions of socketWrapper.
         """
         self.__done.wait(timeout)
+        #time.sleep(2)
         if self.__error:
+            print(self.__error)
             raise self.__error
         return self.__response
 

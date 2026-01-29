@@ -1,13 +1,34 @@
 ## How to get started
 
 ### Prerequisites
+#### Environment
 A Linux environment supporting at least Python version 3.13 (e.g. Debian Trixie).  
 
 Clone the repo :
 > git clone https://github.com/anaelmessan/Keystore-TLS-client-python.git  
 
+#### HSM
+Encryption keys need to be set on the HSM :
+> t<keyslot (1 byte, hex)><key (16 bytes, hex)>
+
+### Configuration
+Warning : Limit the permission of those files and please ensure you never upload them on github.
+#### Azure
+The connection string should be put in cofig/azure.credentials.  
+[Azurite](https://hub.docker.com/r/microsoft/azure-storage-azurite) can also be used to emulate Azure Blob storage.  
+It can be installed using docker or podman. When no azure.credentials is found, the connection string used defaults to Azurite's one.  
+An argument might need to be added to the container when Azurite is out of date.  
+>--skipApiVersionCheck
+
+#### Amazon
+config/amazon_s3/credentials:
+>[default]  
+>aws_access_key_id =   
+>aws_secret_access_key = 
+
+
 ### Running
-Install dependencies (needed for Azure):
+Install dependencies:
 > make install_deps  
 
 If there is an error, ensure that Python venv is installed (_python3-venv_ package on Debian).  
@@ -15,11 +36,17 @@ If there is an error, ensure that Python venv is installed (_python3-venv_ packa
 Run the Azure client:  
 > make run_azure
 
-Run the intermediate server for the AWS client (default port : 6123):
-> make run_server_aws <SERV_PORT=_PORT_>  
+Run the Amazon client:  
+> make run_amazon
 
-Run the stub client (for testing the AWS server connectivity):
-> make run_stub  
+Run the Google client:  
+> make run_google
+
+Run the intermediate Amazon server:  
+> make run_intermediate_server
+
+
+
 
 
 A `config.yaml` file is needed (private).
