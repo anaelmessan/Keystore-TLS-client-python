@@ -6,7 +6,7 @@ PYTHON3_BINARY = python3
 # Amazon server:
 run_intermediate_server:
 	printf "Running the intermediate server for the AWS client, you have to run the client in another terminal"
-	LD_LIBRARY_PATH=$(OPENSSL_PATCHED_PATH) python -m app.templates.intermediate_server_over_localhost_template
+	LD_LIBRARY_PATH=$(OPENSSL_PATCHED_PATH) $(PYTHON_ENV_BINARY) -m app.templates.intermediate_server_over_localhost_template
 
 # Azure client (no need for any intermediate server)
 run_azure:

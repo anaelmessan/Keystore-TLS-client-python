@@ -15,18 +15,23 @@ Encryption keys need to be set on the HSM :
 Warning : Limit the permission of those files and please ensure you never upload them on github.
 #### Azure
 The connection string should be put in cofig/azure.credentials.  
-[Azurite](https://hub.docker.com/r/microsoft/azure-storage-azurite) can also be used to emulate Azure Blob storage.  
+[Azurite](https://hub.docker.com/r/microsoft/azure-storage-azurite) can instead be used to emulate Azure Blob storage. If you prefer doing that, you can follow the instructions below.  
 It can be installed using docker or podman. When no azure.credentials file is found, the connection string used defaults to Azurite's one.  
 An argument might need to be added to the container when Azurite is out of date.  
 >--skipApiVersionCheck  
 
-The keystores to use have to be configured in app/azure/key_provider.py.  
+IMPORTANT : The keystores to use have to be configured in app/azure/key_provider.py.  
 
 #### Amazon
 config/amazon_s3/credentials:
 >[default]  
 >aws_access_key_id =   
 >aws_secret_access_key = 
+
+#### Python version
+Python version can be set in the Makefile. Change the PYTHON3_BINARY variable.  
+If necessary, delete .venv and run:
+> make install_deps
 
 
 ### Running
@@ -57,6 +62,8 @@ A `config.yaml` file is needed (private).
 - Use the implementation of multiple requests in the code.
 - Add more logging
 - Select keystores to connect to
+- Set keys easily
+- Timeout for azure 
 
 ### Notes
 When using the same local connection (same socket) to send different requests to different keystores, wait for the response of the last request sent or use a connection per keystore. The ordering of the responses received is guaranteed only on the same keystore when the requests originate from the same socket.
