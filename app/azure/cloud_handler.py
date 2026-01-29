@@ -55,7 +55,7 @@ class AzureCloudHandler:
 
         self.blob_service_client = BlobServiceClient.from_connection_string(connection_string)
         self.connected = True
-        print("Connected")
+        print("Connected to the cloud.")
 
     def upload(self, path: str, container_name: str, filename: str):
         """

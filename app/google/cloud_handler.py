@@ -27,7 +27,7 @@ class GoogleCloudHandler:
             self.client = self.create_client_GCS()
             self.__service_name = "Google Storage"
         self.connected = True
-        print("Connected")
+        print("Connected to the cloud")
 
     def create_client_fakeGCS(self):
         client = storage.Client(
