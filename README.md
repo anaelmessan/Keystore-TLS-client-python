@@ -56,6 +56,7 @@ A `config.yaml` file is needed (private).
 - AWS
 - Use the implementation of multiple requests in the code.
 - Add more logging
+- Select keystores to connect to
 
 ### Notes
 When using the same local connection (same socket) to send different requests to different keystores, wait for the response of the last request sent or use a connection per keystore. The ordering of the responses received is guaranteed only on the same keystore when the requests originate from the same socket.
